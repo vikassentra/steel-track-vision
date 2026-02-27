@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Calendar, ChevronDown, Download, X } from "lucide-react";
+import { Calendar, Download, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { plants, steelShops, products } from "@/data/mockData";
+import { plants } from "@/data/mockData";
+import type { UnitMode } from "@/pages/Index";
 
 interface FilterBarProps {
   onFrequencyChange: (f: string) => void;
@@ -11,14 +12,12 @@ interface FilterBarProps {
   activeFrequency: string;
   activeFilters: string[];
   onRemoveFilter: (f: string) => void;
+  unitMode: UnitMode;
+  onUnitModeChange: (mode: UnitMode) => void;
 }
 
-const FilterBar = ({ onFrequencyChange, onScopeChange, activeScope, activeFrequency, activeFilters, onRemoveFilter }: FilterBarProps) => {
+const FilterBar = ({ onFrequencyChange, onScopeChange, activeScope, activeFrequency, activeFilters, onRemoveFilter, unitMode, onUnitModeChange }: FilterBarProps) => {
   const [plant, setPlant] = useState("All Plants");
-  const [unit, setUnit] = useState<"tCO2e" | "kgCO2e/t">("tCO2e");
-
-  const frequencies = ["Daily", "Monthly", "Yearly"];
-  const scopes = ["All", "Scope 1", "Scope 2", "Scope 3"];
 
   return (
     <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
@@ -35,7 +34,6 @@ const FilterBar = ({ onFrequencyChange, onScopeChange, activeScope, activeFreque
 
         {/* Center: Filters */}
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Plant selector */}
           <select
             value={plant}
             onChange={(e) => setPlant(e.target.value)}
@@ -48,17 +46,17 @@ const FilterBar = ({ onFrequencyChange, onScopeChange, activeScope, activeFreque
 
           {/* Unit toggle */}
           <div className="flex bg-secondary rounded-md p-0.5">
-            {(["tCO2e", "kgCO2e/t"] as const).map((u) => (
+            {(["emissions", "energy"] as const).map((mode) => (
               <button
-                key={u}
-                onClick={() => setUnit(u)}
+                key={mode}
+                onClick={() => onUnitModeChange(mode)}
                 className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
-                  unit === u
+                  unitMode === mode
                     ? "bg-accent text-accent-foreground"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {u === "tCO2e" ? "Emissions" : "Energy"}
+                {mode === "emissions" ? "Emissions" : "Energy"}
               </button>
             ))}
           </div>

@@ -1,20 +1,25 @@
 import { dailyEmissions } from "@/data/mockData";
 import {
-  ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area
+  ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from "recharts";
+import type { UnitMode } from "@/pages/Index";
 
 interface TrendChartProps {
   onPointClick: (date: string) => void;
+  unitMode: UnitMode;
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const absUnit = (mode: UnitMode) => mode === "energy" ? "TJ" : "tCO2e";
+const intUnit = (mode: UnitMode) => mode === "energy" ? "TJ/t" : "kgCO2e/t";
+
+const CustomTooltip = ({ active, payload, label, unitMode }: any) => {
   if (!active || !payload?.length) return null;
   const d = payload[0]?.payload;
   return (
     <div className="bg-popover border border-border rounded-lg p-3 shadow-xl text-xs space-y-1">
       <p className="font-semibold text-foreground">{label}</p>
-      <p className="text-muted-foreground">Total: <span className="text-foreground font-mono">{d.totalEmissions?.toLocaleString()} tCO2e</span></p>
-      <p className="text-muted-foreground">Intensity: <span className="text-foreground font-mono">{d.intensity} kgCO2e/t</span></p>
+      <p className="text-muted-foreground">Total: <span className="text-foreground font-mono">{d.totalEmissions?.toLocaleString()} {absUnit(unitMode)}</span></p>
+      <p className="text-muted-foreground">Intensity: <span className="text-foreground font-mono">{d.intensity} {intUnit(unitMode)}</span></p>
       <p className="text-muted-foreground">Production: <span className="text-foreground font-mono">{d.production?.toLocaleString()} t</span></p>
       <div className="flex gap-3 pt-1 border-t border-border mt-1">
         <span className="text-scope1">S1: {d.scope1?.toLocaleString()}</span>
@@ -25,10 +30,10 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-const TrendChart = ({ onPointClick }: TrendChartProps) => {
+const TrendChart = ({ onPointClick, unitMode }: TrendChartProps) => {
   const data = dailyEmissions.map((d) => ({
     ...d,
-    date: d.date.slice(5), // MM-DD
+    date: d.date.slice(5),
   }));
 
   return (
@@ -36,7 +41,7 @@ const TrendChart = ({ onPointClick }: TrendChartProps) => {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-sm font-semibold text-foreground">Emissions Trend</h3>
-          <p className="text-xs text-muted-foreground">tCO2e by day — click a point to explore deviations</p>
+          <p className="text-xs text-muted-foreground">{absUnit(unitMode)} by day — click a point to explore deviations</p>
         </div>
         <div className="flex items-center gap-3 text-xs">
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-scope1" />Scope 1</span>
@@ -49,7 +54,7 @@ const TrendChart = ({ onPointClick }: TrendChartProps) => {
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 18%)" />
           <XAxis dataKey="date" tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }} />
           <YAxis tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }} />
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip content={<CustomTooltip unitMode={unitMode} />} />
           <Bar dataKey="scope1" stackId="a" fill="hsl(168 70% 50%)" radius={[0, 0, 0, 0]} />
           <Bar dataKey="scope2" stackId="a" fill="hsl(45 95% 58%)" radius={[0, 0, 0, 0]} />
           <Bar dataKey="scope3" stackId="a" fill="hsl(270 60% 60%)" radius={[2, 2, 0, 0]} />

@@ -1,23 +1,27 @@
 import { useState } from "react";
-import { X, AlertTriangle, TrendingUp, ChevronRight } from "lucide-react";
+import { X, AlertTriangle, ChevronRight } from "lucide-react";
 import { waterfallData, driverDetails } from "@/data/mockData";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell
 } from "recharts";
 import DriverDetailModal from "./DriverDetailModal";
+import type { UnitMode } from "@/pages/Index";
 
 interface DeviationDrawerProps {
   open: boolean;
   onClose: () => void;
   selectedDate?: string;
+  unitMode: UnitMode;
 }
 
-const DeviationDrawer = ({ open, onClose, selectedDate }: DeviationDrawerProps) => {
+const absUnit = (mode: UnitMode) => mode === "energy" ? "TJ" : "tCO2e";
+const intUnit = (mode: UnitMode) => mode === "energy" ? "TJ/t" : "kgCO2e/t";
+
+const DeviationDrawer = ({ open, onClose, selectedDate, unitMode }: DeviationDrawerProps) => {
   const [selectedDriver, setSelectedDriver] = useState<string | null>(null);
 
   if (!open) return null;
 
-  // Transform waterfall data for visual rendering
   const waterfallChartData = waterfallData.map((item) => ({
     name: item.name,
     value: item.type === "total" ? item.value : Math.abs(item.value),
@@ -30,10 +34,8 @@ const DeviationDrawer = ({ open, onClose, selectedDate }: DeviationDrawerProps) 
 
   return (
     <>
-      {/* Backdrop */}
       <div className="fixed inset-0 bg-background/60 z-40" onClick={onClose} />
 
-      {/* Drawer */}
       <div className="fixed right-0 top-0 bottom-0 w-full max-w-xl bg-card border-l border-border z-50 overflow-y-auto animate-slide-in-right">
         <div className="sticky top-0 bg-card/95 backdrop-blur-sm border-b border-border p-4 flex items-center justify-between">
           <div>
@@ -50,12 +52,12 @@ const DeviationDrawer = ({ open, onClose, selectedDate }: DeviationDrawerProps) 
           <div className="flex gap-3">
             <div className="flex-1 bg-secondary rounded-lg p-3">
               <p className="text-xs text-muted-foreground">Emissions Change</p>
-              <p className="text-lg font-bold text-chart-negative font-mono">+450 tCO2e</p>
+              <p className="text-lg font-bold text-chart-negative font-mono">+450 {absUnit(unitMode)}</p>
               <p className="text-xs text-muted-foreground">+3.4% vs previous day</p>
             </div>
             <div className="flex-1 bg-secondary rounded-lg p-3">
               <p className="text-xs text-muted-foreground">Intensity Change</p>
-              <p className="text-lg font-bold text-chart-negative font-mono">+0.05 kgCO2e/t</p>
+              <p className="text-lg font-bold text-chart-negative font-mono">+0.05 {intUnit(unitMode)}</p>
               <p className="text-xs text-muted-foreground">+1.8% vs previous day</p>
             </div>
           </div>
@@ -96,7 +98,7 @@ const DeviationDrawer = ({ open, onClose, selectedDate }: DeviationDrawerProps) 
                     <th className="text-left p-2 text-muted-foreground font-medium">Scope</th>
                     <th className="text-left p-2 text-muted-foreground font-medium">Shop</th>
                     <th className="text-right p-2 text-muted-foreground font-medium">Δ Activity</th>
-                    <th className="text-right p-2 text-muted-foreground font-medium">Δ tCO2e</th>
+                    <th className="text-right p-2 text-muted-foreground font-medium">Δ {absUnit(unitMode)}</th>
                     <th className="w-6"></th>
                   </tr>
                 </thead>
@@ -131,7 +133,6 @@ const DeviationDrawer = ({ open, onClose, selectedDate }: DeviationDrawerProps) 
         </div>
       </div>
 
-      {/* Driver Detail Modal */}
       <DriverDetailModal
         driver={selectedDriver}
         onClose={() => setSelectedDriver(null)}

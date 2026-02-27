@@ -1,9 +1,17 @@
 import { useState } from "react";
 import { peerBenchmarks, peerGroups } from "@/data/mockData";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from "recharts";
+import type { UnitMode } from "@/pages/Index";
 
-const PeerBenchmark = () => {
+interface PeerBenchmarkProps {
+  unitMode: UnitMode;
+}
+
+const intUnit = (mode: UnitMode) => mode === "energy" ? "TJ/t" : "kgCO2e/t";
+
+const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
   const [group, setGroup] = useState(peerGroups[0]);
+  const u = intUnit(unitMode);
 
   const sorted = [...peerBenchmarks].sort((a, b) => a.intensity - b.intensity);
   const yourValue = peerBenchmarks.find((p) => p.type === "you");
@@ -15,7 +23,7 @@ const PeerBenchmark = () => {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-sm font-semibold text-foreground">Peer Benchmark</h3>
-          <p className="text-xs text-muted-foreground">Intensity comparison (kgCO2e/t crude steel)</p>
+          <p className="text-xs text-muted-foreground">Intensity comparison ({u} crude steel)</p>
         </div>
         <select
           value={group}
@@ -29,7 +37,6 @@ const PeerBenchmark = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Chart */}
         <div className="lg:col-span-2">
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={sorted} layout="vertical" margin={{ left: 80 }}>
@@ -43,7 +50,7 @@ const PeerBenchmark = () => {
                   borderRadius: 8,
                   fontSize: 12,
                 }}
-                formatter={(v: number) => [`${v} kgCO2e/t`]}
+                formatter={(v: number) => [`${v} ${u}`]}
               />
               {median && (
                 <ReferenceLine x={median.intensity} stroke="hsl(330 80% 60%)" strokeDasharray="4 4" label={{ value: "Median", fontSize: 10, fill: "hsl(330 80% 60%)" }} />
@@ -60,12 +67,11 @@ const PeerBenchmark = () => {
           </ResponsiveContainer>
         </div>
 
-        {/* Summary */}
         <div className="space-y-3">
           <div className="bg-secondary rounded-lg p-3">
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Your Intensity</p>
             <p className="text-xl font-bold text-primary font-mono">{yourValue?.intensity}</p>
-            <p className="text-xs text-muted-foreground">kgCO2e/t</p>
+            <p className="text-xs text-muted-foreground">{u}</p>
           </div>
           <div className="bg-secondary rounded-lg p-3">
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Percentile Rank</p>
