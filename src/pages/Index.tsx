@@ -1,12 +1,91 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import FilterBar from "@/components/dashboard/FilterBar";
+import KPICardsRow from "@/components/dashboard/KPICardsRow";
+import TrendChart from "@/components/dashboard/TrendChart";
+import BreakdownPanels from "@/components/dashboard/BreakdownPanels";
+import DeviationDrawer from "@/components/dashboard/DeviationDrawer";
+import PeerBenchmark from "@/components/dashboard/PeerBenchmark";
 
 const Index = () => {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string | undefined>();
+  const [activeScope, setActiveScope] = useState("All");
+  const [activeFrequency, setActiveFrequency] = useState("Daily");
+  const [activeFilters, setActiveFilters] = useState<string[]>([]);
+
+  const handlePointClick = (date: string) => {
+    setSelectedDate(date);
+    setDrawerOpen(true);
+  };
+
+  const handleShopClick = (shop: string) => {
+    if (!activeFilters.includes(shop)) {
+      setActiveFilters((prev) => [...prev, shop]);
+    }
+  };
+
+  const handleScopeClick = (scope: string) => {
+    setActiveScope(scope);
+    if (scope !== "All" && !activeFilters.includes(scope)) {
+      setActiveFilters((prev) => [...prev, scope]);
+    }
+  };
+
+  const handleRemoveFilter = (filter: string) => {
+    setActiveFilters((prev) => prev.filter((f) => f !== filter));
+    if (["Scope 1", "Scope 2", "Scope 3"].includes(filter)) {
+      setActiveScope("All");
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-background">
+      <FilterBar
+        onFrequencyChange={setActiveFrequency}
+        onScopeChange={handleScopeClick}
+        activeScope={activeScope}
+        activeFrequency={activeFrequency}
+        activeFilters={activeFilters}
+        onRemoveFilter={handleRemoveFilter}
+      />
+
+      <div className="p-6 space-y-4 max-w-[1600px] mx-auto">
+        {/* Page Title */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-bold text-foreground">Emissions Overview</h2>
+            <p className="text-xs text-muted-foreground">Carbon footprint monitoring · Steel Co. · All Plants</p>
+          </div>
+        </div>
+
+        {/* KPI Cards */}
+        <KPICardsRow onKPIClick={() => setDrawerOpen(true)} />
+
+        {/* Trend Chart */}
+        <TrendChart onPointClick={handlePointClick} />
+
+        {/* Breakdown Panels */}
+        <BreakdownPanels
+          onShopClick={handleShopClick}
+          onScopeClick={handleScopeClick}
+          activeScope={activeScope}
+        />
+
+        {/* Peer Benchmark */}
+        <PeerBenchmark />
+
+        {/* Footer */}
+        <div className="text-center py-4">
+          <p className="text-[10px] text-muted-foreground">© sentra.world 2026 · Data refreshed daily · All values in tCO2e unless noted</p>
+        </div>
       </div>
+
+      {/* Deviation Drawer */}
+      <DeviationDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        selectedDate={selectedDate}
+      />
     </div>
   );
 };
