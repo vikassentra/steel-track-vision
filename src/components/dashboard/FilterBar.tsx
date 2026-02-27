@@ -35,29 +35,6 @@ const FilterBar = ({ onFrequencyChange, onScopeChange, activeScope, activeFreque
 
         {/* Center: Filters */}
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Frequency toggle */}
-          <div className="flex bg-secondary rounded-md p-0.5">
-            {frequencies.map((f) => (
-              <button
-                key={f}
-                onClick={() => onFrequencyChange(f)}
-                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
-                  activeFrequency === f
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {f}
-              </button>
-            ))}
-          </div>
-
-          {/* Date */}
-          <button className="flex items-center gap-2 px-3 py-1.5 text-xs bg-secondary rounded-md text-secondary-foreground hover:bg-surface-overlay transition-colors">
-            <Calendar className="w-3.5 h-3.5" />
-            <span>Jan '23 – Mar '25</span>
-          </button>
-
           {/* Plant selector */}
           <select
             value={plant}
@@ -68,23 +45,6 @@ const FilterBar = ({ onFrequencyChange, onScopeChange, activeScope, activeFreque
               <option key={p} value={p}>{p}</option>
             ))}
           </select>
-
-          {/* Scope toggle */}
-          <div className="flex bg-secondary rounded-md p-0.5">
-            {scopes.map((s) => (
-              <button
-                key={s}
-                onClick={() => onScopeChange(s)}
-                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
-                  activeScope === s
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
 
           {/* Unit toggle */}
           <div className="flex bg-secondary rounded-md p-0.5">
@@ -98,17 +58,23 @@ const FilterBar = ({ onFrequencyChange, onScopeChange, activeScope, activeFreque
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {u}
+                {u === "tCO2e" ? "Emissions" : "Energy"}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Right: Export */}
-        <Button variant="outline" size="sm" className="text-xs gap-1.5">
-          <Download className="w-3.5 h-3.5" />
-          Export
-        </Button>
+        {/* Right: Date & Export */}
+        <div className="flex items-center gap-2">
+          <button className="flex items-center gap-2 px-3 py-1.5 text-xs bg-secondary rounded-md text-secondary-foreground hover:bg-surface-overlay transition-colors">
+            <Calendar className="w-3.5 h-3.5" />
+            <span>Jan '23 – Mar '25</span>
+          </button>
+          <Button variant="outline" size="sm" className="text-xs gap-1.5">
+            <Download className="w-3.5 h-3.5" />
+            Export
+          </Button>
+        </div>
       </div>
 
       {/* Active filter chips */}
