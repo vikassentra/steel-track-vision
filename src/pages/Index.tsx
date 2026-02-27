@@ -6,12 +6,15 @@ import BreakdownPanels from "@/components/dashboard/BreakdownPanels";
 import DeviationDrawer from "@/components/dashboard/DeviationDrawer";
 import PeerBenchmark from "@/components/dashboard/PeerBenchmark";
 
+export type UnitMode = "emissions" | "energy";
+
 const Index = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | undefined>();
   const [activeScope, setActiveScope] = useState("All");
   const [activeFrequency, setActiveFrequency] = useState("Daily");
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [unitMode, setUnitMode] = useState<UnitMode>("emissions");
 
   const handlePointClick = (date: string) => {
     setSelectedDate(date);
@@ -47,8 +50,9 @@ const Index = () => {
         activeFrequency={activeFrequency}
         activeFilters={activeFilters}
         onRemoveFilter={handleRemoveFilter}
+        unitMode={unitMode}
+        onUnitModeChange={setUnitMode}
       />
-
       <div className="p-6 space-y-4 max-w-[1600px] mx-auto">
         {/* Page Title */}
         <div className="flex items-center justify-between">
@@ -59,20 +63,21 @@ const Index = () => {
         </div>
 
         {/* KPI Cards */}
-        <KPICardsRow onKPIClick={() => setDrawerOpen(true)} />
+        <KPICardsRow onKPIClick={() => setDrawerOpen(true)} unitMode={unitMode} />
 
         {/* Trend Chart */}
-        <TrendChart onPointClick={handlePointClick} />
+        <TrendChart onPointClick={handlePointClick} unitMode={unitMode} />
 
         {/* Breakdown Panels */}
         <BreakdownPanels
           onShopClick={handleShopClick}
           onScopeClick={handleScopeClick}
           activeScope={activeScope}
+          unitMode={unitMode}
         />
 
         {/* Peer Benchmark */}
-        <PeerBenchmark />
+        <PeerBenchmark unitMode={unitMode} />
 
         {/* Footer */}
         <div className="text-center py-4">
@@ -85,6 +90,7 @@ const Index = () => {
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         selectedDate={selectedDate}
+        unitMode={unitMode}
       />
     </div>
   );
