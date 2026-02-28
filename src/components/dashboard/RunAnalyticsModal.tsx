@@ -3,7 +3,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from "recharts";
-import { ArrowRightLeft, TrendingUp, Factory, Fuel, Calendar } from "lucide-react";
+import { ArrowRightLeft, TrendingUp, Factory, Fuel, Calendar, Plus, X } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface RunAnalyticsModalProps {
   open: boolean;
@@ -13,6 +14,29 @@ interface RunAnalyticsModalProps {
 const locations = ["Rourkela Works", "Burnpur Works", "Durgapur Steel"];
 const timePeriods = ["FY24 Q1", "FY24 Q2", "FY24 Q3", "FY24 Q4", "FY25 Q1", "FY25 Q2"];
 const drivers = ["Coke Rate", "PCI Rate", "Scrap Ratio", "Power Mix", "BFG Recovery", "Sinter Ratio"];
+
+interface MetricRow {
+  metric: string;
+  rourkela: number;
+  burnpur: number;
+  durgapur: number;
+  unit: string;
+}
+
+const allAvailableMetrics: MetricRow[] = [
+  { metric: "Intensity", rourkela: 2.85, burnpur: 2.62, durgapur: 2.91, unit: "tCO₂e/t" },
+  { metric: "Coke Rate", rourkela: 385, burnpur: 372, durgapur: 398, unit: "kg/tHM" },
+  { metric: "PCI Rate", rourkela: 142, burnpur: 158, durgapur: 128, unit: "kg/tHM" },
+  { metric: "Scrap Ratio", rourkela: 18, burnpur: 22, durgapur: 15, unit: "%" },
+  { metric: "BFG Recovery", rourkela: 88, burnpur: 92, durgapur: 85, unit: "%" },
+  { metric: "Sinter Ratio", rourkela: 78, burnpur: 82, durgapur: 74, unit: "%" },
+  { metric: "Power Mix", rourkela: 42, burnpur: 38, durgapur: 45, unit: "% renewable" },
+  { metric: "Slag Rate", rourkela: 320, burnpur: 298, durgapur: 345, unit: "kg/tHM" },
+  { metric: "Pellet Ratio", rourkela: 25, burnpur: 30, durgapur: 20, unit: "%" },
+  { metric: "COG Recovery", rourkela: 91, burnpur: 89, durgapur: 87, unit: "%" },
+];
+
+const defaultMetrics = ["Intensity", "Coke Rate", "PCI Rate", "Scrap Ratio", "BFG Recovery"];
 
 const comparisonData = [
   { metric: "Total Emissions", rourkela: 14200, burnpur: 11800, durgapur: 9400, unit: "tCO₂e/day" },
@@ -42,12 +66,28 @@ type Tab = "location" | "time" | "drivers";
 const RunAnalyticsModal = ({ open, onClose }: RunAnalyticsModalProps) => {
   const [activeTab, setActiveTab] = useState<Tab>("location");
   const [selectedLocations, setSelectedLocations] = useState<string[]>(["Rourkela Works", "Burnpur Works"]);
+  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(defaultMetrics);
+  const [addMenuOpen, setAddMenuOpen] = useState(false);
 
   const toggleLocation = (loc: string) => {
     setSelectedLocations((prev) =>
       prev.includes(loc) ? prev.filter((l) => l !== loc) : [...prev, loc]
     );
   };
+
+  const removeMetric = (metric: string) => {
+    setSelectedMetrics((prev) => prev.filter((m) => m !== metric));
+  };
+
+  const addMetric = (metric: string) => {
+    if (!selectedMetrics.includes(metric)) {
+      setSelectedMetrics((prev) => [...prev, metric]);
+    }
+    setAddMenuOpen(false);
+  };
+
+  const availableToAdd = allAvailableMetrics.filter((m) => !selectedMetrics.includes(m.metric));
+  const filteredData = allAvailableMetrics.filter((m) => selectedMetrics.includes(m.metric));
 
   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
     { key: "location", label: "Cross-Location", icon: <Factory className="w-3.5 h-3.5" /> },
@@ -101,6 +141,44 @@ const RunAnalyticsModal = ({ open, onClose }: RunAnalyticsModalProps) => {
         {/* Cross-Location Tab */}
         {activeTab === "location" && (
           <div className="space-y-4">
+            {/* Metrics selector chips */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {selectedMetrics.map((m) => (
+                <Badge key={m} variant="outline" className="text-xs flex items-center gap-1 pr-1">
+                  {m}
+                  <button
+                    onClick={() => removeMetric(m)}
+                    className="ml-0.5 rounded-full hover:bg-destructive/20 p-0.5 transition-colors"
+                  >
+                    <X className="w-3 h-3 text-muted-foreground hover:text-destructive" />
+                  </button>
+                </Badge>
+              ))}
+              {availableToAdd.length > 0 && (
+                <Popover open={addMenuOpen} onOpenChange={setAddMenuOpen}>
+                  <PopoverTrigger asChild>
+                    <button className="flex items-center gap-1 px-2 py-1 text-[10px] text-primary border border-dashed border-primary/40 rounded-md hover:bg-primary/10 transition-colors">
+                      <Plus className="w-3 h-3" />
+                      Add Metric
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-48 p-1" align="start">
+                    <div className="max-h-48 overflow-y-auto">
+                      {availableToAdd.map((m) => (
+                        <button
+                          key={m.metric}
+                          onClick={() => addMetric(m.metric)}
+                          className="w-full text-left px-2.5 py-1.5 text-xs hover:bg-secondary rounded transition-colors"
+                        >
+                          {m.metric} <span className="text-muted-foreground">({m.unit})</span>
+                        </button>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )}
+            </div>
+
             {/* KPI Comparison Table */}
             <div className="border border-border rounded-lg overflow-hidden">
               <table className="w-full text-xs">
@@ -111,10 +189,11 @@ const RunAnalyticsModal = ({ open, onClose }: RunAnalyticsModalProps) => {
                       <th key={loc} className="text-right p-2.5 font-medium text-muted-foreground">{loc.split(" ")[0]}</th>
                     ))}
                     <th className="text-right p-2.5 font-medium text-muted-foreground">Unit</th>
+                    <th className="w-8"></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {comparisonData.map((row) => {
+                  {filteredData.map((row) => {
                     const values = [row.rourkela, row.burnpur, row.durgapur];
                     const best = Math.min(...values);
                     return (
@@ -124,6 +203,14 @@ const RunAnalyticsModal = ({ open, onClose }: RunAnalyticsModalProps) => {
                         <td className={`p-2.5 text-right tabular-nums ${row.burnpur === best ? "text-emerald-400 font-semibold" : ""}`}>{row.burnpur.toLocaleString()}</td>
                         <td className={`p-2.5 text-right tabular-nums ${row.durgapur === best ? "text-emerald-400 font-semibold" : ""}`}>{row.durgapur.toLocaleString()}</td>
                         <td className="p-2.5 text-right text-muted-foreground">{row.unit}</td>
+                        <td className="p-1">
+                          <button
+                            onClick={() => removeMetric(row.metric)}
+                            className="p-1 rounded hover:bg-destructive/20 transition-colors"
+                          >
+                            <X className="w-3 h-3 text-muted-foreground hover:text-destructive" />
+                          </button>
+                        </td>
                       </tr>
                     );
                   })}
@@ -131,19 +218,19 @@ const RunAnalyticsModal = ({ open, onClose }: RunAnalyticsModalProps) => {
               </table>
             </div>
 
-            {/* Bar Chart */}
+            {/* Horizontal Bar Chart */}
             <div className="bg-secondary/30 rounded-lg p-4">
-              <p className="text-xs font-medium mb-3">Emissions Intensity Comparison</p>
-              <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={comparisonData.slice(0, 4)} barGap={4}>
+              <p className="text-xs font-medium mb-3">Cross-Location Comparison</p>
+              <ResponsiveContainer width="100%" height={filteredData.length * 50 + 40}>
+                <BarChart data={filteredData} layout="vertical" barGap={2}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="metric" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                  <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                  <XAxis type="number" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                  <YAxis dataKey="metric" type="category" width={90} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
                   <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11 }} />
                   <Legend wrapperStyle={{ fontSize: 10 }} />
-                  <Bar dataKey="rourkela" name="Rourkela" fill="hsl(168 70% 50%)" radius={[3, 3, 0, 0]} barSize={18} />
-                  <Bar dataKey="burnpur" name="Burnpur" fill="hsl(45 95% 58%)" radius={[3, 3, 0, 0]} barSize={18} />
-                  <Bar dataKey="durgapur" name="Durgapur" fill="hsl(270 60% 60%)" radius={[3, 3, 0, 0]} barSize={18} />
+                  <Bar dataKey="rourkela" name="Rourkela" fill="hsl(168 70% 50%)" radius={[0, 3, 3, 0]} barSize={14} />
+                  <Bar dataKey="burnpur" name="Burnpur" fill="hsl(45 95% 58%)" radius={[0, 3, 3, 0]} barSize={14} />
+                  <Bar dataKey="durgapur" name="Durgapur" fill="hsl(270 60% 60%)" radius={[0, 3, 3, 0]} barSize={14} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
