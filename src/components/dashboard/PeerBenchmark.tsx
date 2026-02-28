@@ -73,10 +73,6 @@ const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
             <p className="text-xl font-bold text-primary font-mono">{yourValue?.intensity}</p>
             <p className="text-xs text-muted-foreground">{u}</p>
           </div>
-          <div className="bg-secondary rounded-lg p-3">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Percentile Rank</p>
-            <p className="text-xl font-bold text-accent font-mono">{rank}/{sorted.length}</p>
-          </div>
           <div className="bg-secondary rounded-lg p-3 space-y-1">
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Benchmarks</p>
             <div className="flex justify-between text-xs">
