@@ -37,7 +37,7 @@ const DriverDetailModal = ({ driver, shop, onClose }: DriverDetailModalProps) =>
   const flags = [
     { type: "ok", text: "Data received on time" },
     { type: "warning", text: "Manual override detected for Feb 26" },
-    { type: "ok", text: "EF source: IPCC 2019" },
+    
   ];
 
   return (
@@ -113,6 +113,9 @@ const DriverDetailModal = ({ driver, shop, onClose }: DriverDetailModalProps) =>
             <div key={m.label} className="bg-secondary rounded-lg p-2.5">
               <p className="text-[10px] text-muted-foreground">{m.label}</p>
               <p className="text-sm font-semibold text-foreground font-mono">{m.value}</p>
+              {m.label === "EF (kgCO2/unit)" && (
+                <p className="text-[9px] text-muted-foreground mt-1">Source: IPCC 2019</p>
+              )}
             </div>
           ))}
         </div>
