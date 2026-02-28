@@ -12,7 +12,7 @@ interface BreakdownPanelsProps {
   unitMode: UnitMode;
 }
 
-const absUnit = (mode: UnitMode) => mode === "energy" ? "TJ" : "tCO2e";
+const absUnit = (mode: UnitMode) => mode === "energy" ? "TJ/t" : "tCO2e/t";
 
 const SCOPE_COLORS = {
   "Scope 1": "hsl(168 70% 50%)",
