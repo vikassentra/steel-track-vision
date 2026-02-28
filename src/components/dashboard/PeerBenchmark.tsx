@@ -99,7 +99,7 @@ const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
 
               <YAxis
                 tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }}
-                domain={[2.4, 3.2]}
+                domain={[0, 3.2]}
                 axisLine={false}
                 tickLine={false} />
 
