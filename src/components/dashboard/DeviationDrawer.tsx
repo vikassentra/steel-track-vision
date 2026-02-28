@@ -2,7 +2,7 @@ import { useState } from "react";
 import { X, AlertTriangle, ChevronRight } from "lucide-react";
 import { waterfallData, driverDetails } from "@/data/mockData";
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LabelList
 } from "recharts";
 import DriverDetailModal from "./DriverDetailModal";
 import type { UnitMode } from "@/pages/Index";
@@ -27,19 +27,20 @@ const DeviationDrawer = ({ open, onClose, selectedDate, unitMode }: DeviationDra
     let running = 0;
     return waterfallData.map((item) => {
       if (item.type === "total") {
-        const result = { name: item.name, base: 0, value: item.value, fill: "hsl(215 15% 40%)" };
+        const result = { name: item.name, base: 0, value: item.value, label: item.value.toLocaleString(), fill: "hsl(210 70% 50%)" };
         running = item.value;
         return result;
       }
       const absVal = Math.abs(item.value);
-      const fill = item.value > 0 ? "hsl(0 72% 55%)" : "hsl(168 70% 50%)";
+      const fill = item.value > 0 ? "hsl(90 55% 45%)" : "hsl(0 65% 50%)";
+      const label = (item.value > 0 ? "+" : "") + item.value;
       if (item.value > 0) {
-        const result = { name: item.name, base: running, value: absVal, fill };
+        const result = { name: item.name, base: running, value: absVal, label, fill };
         running += absVal;
         return result;
       } else {
         running -= absVal;
-        return { name: item.name, base: running, value: absVal, fill };
+        return { name: item.name, base: running, value: absVal, label, fill };
       }
     });
   })();
@@ -77,9 +78,9 @@ const DeviationDrawer = ({ open, onClose, selectedDate, unitMode }: DeviationDra
           {/* Waterfall */}
           <div>
             <h3 className="text-xs font-semibold text-foreground mb-3">Contribution Waterfall</h3>
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={waterfallChartData} barCategoryGap="20%">
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 18%)" />
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={waterfallChartData} barCategoryGap="15%">
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 18%)" vertical={false} />
                 <XAxis dataKey="name" tick={{ fontSize: 9, fill: "hsl(215 15% 55%)" }} angle={-20} textAnchor="end" height={50} />
                 <YAxis tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }} domain={['auto', 'auto']} />
                 <Tooltip
@@ -99,6 +100,11 @@ const DeviationDrawer = ({ open, onClose, selectedDate, unitMode }: DeviationDra
                   {waterfallChartData.map((entry, idx) => (
                     <Cell key={idx} fill={entry.fill} />
                   ))}
+                  <LabelList
+                    dataKey="label"
+                    position="top"
+                    style={{ fontSize: 9, fill: "hsl(215 15% 70%)", fontWeight: 600 }}
+                  />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
