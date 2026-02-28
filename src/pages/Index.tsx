@@ -6,6 +6,7 @@ import BreakdownPanels from "@/components/dashboard/BreakdownPanels";
 import DeviationDrawer from "@/components/dashboard/DeviationDrawer";
 import PeerBenchmark from "@/components/dashboard/PeerBenchmark";
 import DriverDetailModal from "@/components/dashboard/DriverDetailModal";
+import ShopDetailModal from "@/components/dashboard/ShopDetailModal";
 import { plants } from "@/data/mockData";
 
 export type UnitMode = "emissions" | "energy";
@@ -19,6 +20,7 @@ const Index = () => {
   const [unitMode, setUnitMode] = useState<UnitMode>("emissions");
   const [activeShop, setActiveShop] = useState("BF");
   const [selectedDriver, setSelectedDriver] = useState<string | null>(null);
+  const [selectedShop, setSelectedShop] = useState<string | null>(null);
 
   const handlePointClick = (date: string) => {
     setSelectedDate(date);
@@ -26,9 +28,7 @@ const Index = () => {
   };
 
   const handleShopClick = (shop: string) => {
-    if (!activeFilters.includes(shop)) {
-      setActiveFilters((prev) => [...prev, shop]);
-    }
+    setSelectedShop(shop);
   };
 
   const handleScopeClick = (scope: string) => {
@@ -128,6 +128,11 @@ const Index = () => {
         driver={selectedDriver}
         shop={activeShop}
         onClose={() => setSelectedDriver(null)} />
+
+      {/* Shop Detail Modal */}
+      <ShopDetailModal
+        shop={selectedShop}
+        onClose={() => setSelectedShop(null)} />
 
     </div>);
 
