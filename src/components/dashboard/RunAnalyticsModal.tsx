@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, Cell } from "recharts";
 import { ArrowRightLeft, TrendingUp, Factory, Fuel, Calendar, Plus, X } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
@@ -271,21 +271,32 @@ const RunAnalyticsModal = ({ open, onClose }: RunAnalyticsModalProps) => {
               </table>
             </div>
 
-            {/* Horizontal Bar Chart */}
-            <div className="bg-secondary/30 rounded-lg p-4">
-              <p className="text-xs font-medium mb-3">Cross-Location Comparison</p>
-              <ResponsiveContainer width="100%" height={filteredData.length * 50 + 40}>
-                <BarChart data={filteredData} layout="vertical" barGap={2}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis type="number" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                  <YAxis dataKey="metric" type="category" width={90} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11 }} />
-                  <Legend wrapperStyle={{ fontSize: 10 }} />
-                  <Bar dataKey="rourkela" name="Rourkela" fill="hsl(168 70% 50%)" radius={[0, 3, 3, 0]} barSize={14} />
-                  <Bar dataKey="burnpur" name="Burnpur" fill="hsl(45 95% 58%)" radius={[0, 3, 3, 0]} barSize={14} />
-                  <Bar dataKey="durgapur" name="Durgapur" fill="hsl(270 60% 60%)" radius={[0, 3, 3, 0]} barSize={14} />
-                </BarChart>
-              </ResponsiveContainer>
+            {/* Individual Bar Charts per Metric */}
+            <div className="grid grid-cols-2 gap-3">
+              {filteredData.map((row) => {
+                const chartData = [
+                  { name: "Rourkela", value: row.rourkela, fill: "hsl(168 70% 50%)" },
+                  { name: "Burnpur", value: row.burnpur, fill: "hsl(45 95% 58%)" },
+                  { name: "Durgapur", value: row.durgapur, fill: "hsl(270 60% 60%)" },
+                ];
+                return (
+                  <div key={row.metric} className="bg-secondary/30 rounded-lg p-3">
+                    <p className="text-[11px] font-medium mb-1">{row.metric} <span className="text-muted-foreground font-normal">({row.unit})</span></p>
+                    <ResponsiveContainer width="100%" height={90}>
+                      <BarChart data={chartData} layout="vertical" barGap={2}>
+                        <XAxis type="number" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} hide />
+                        <YAxis dataKey="name" type="category" width={60} tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} />
+                        <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11 }} />
+                        <Bar dataKey="value" radius={[0, 3, 3, 0]} barSize={14}>
+                          {chartData.map((entry, idx) => (
+                            <Cell key={idx} fill={entry.fill} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
