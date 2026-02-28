@@ -114,7 +114,7 @@ const ShopDetailModal = ({ shop, onClose }: ShopDetailModalProps) => {
           <div className="flex items-center justify-between mb-5">
             <div>
               <h3 className="text-base font-semibold text-foreground">{shop} — Top Drivers</h3>
-              <p className="text-xs text-muted-foreground">Top 10 emission drivers · click a row for details</p>
+              <p className="text-xs text-muted-foreground">Top 10 emission drivers by plant · click a row for details</p>
             </div>
             <div className="flex items-center gap-3">
               <span className="text-xs text-muted-foreground">
