@@ -43,7 +43,7 @@ const DriverDetailModal = ({ driver, shop, onClose }: DriverDetailModalProps) =>
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center">
       <div className="absolute inset-0 bg-background/70" onClick={onClose} />
-      <div className="relative bg-card border border-border rounded-xl shadow-2xl w-full max-w-lg p-5 animate-fade-in">
+      <div className="relative bg-card border border-border rounded-xl shadow-2xl w-full max-w-2xl p-6 animate-fade-in max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-sm font-semibold text-foreground">Driver Detail: {driver}</h3>
