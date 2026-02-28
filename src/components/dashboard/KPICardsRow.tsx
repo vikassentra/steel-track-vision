@@ -63,20 +63,21 @@ interface KPICardsRowProps {
 }
 
 const absUnit = (mode: UnitMode) => mode === "energy" ? "TJ" : "tCO2e";
-const intUnit = (mode: UnitMode) => mode === "energy" ? "TJ/t" : "kgCO2e/t";
+const intUnit = (mode: UnitMode) => mode === "energy" ? "TJ/t" : "tCO2e/t";
 
 const KPICardsRow = ({ onKPIClick, unitMode }: KPICardsRowProps) => {
   const cards = [
     { title: "Total Emissions", value: "13,650", unit: absUnit(unitMode), delta: 3.4, deltaLabel: "vs prev day" },
-    { title: "Intensity", value: "2.85", unit: intUnit(unitMode), delta: 1.8, deltaLabel: "vs prev day" },
     { title: "Production", value: "4,789", unit: "tonnes", delta: 2.1, deltaLabel: "vs prev day" },
-    { title: "Scope 1", value: "8,466", unit: absUnit(unitMode), delta: 4.2, deltaLabel: "vs prev day", scopeColor: "bg-scope1" },
-    { title: "Scope 2", value: "3,003", unit: absUnit(unitMode), delta: -1.2, deltaLabel: "vs prev day", scopeColor: "bg-scope2" },
-    { title: "Scope 3", value: "2,181", unit: absUnit(unitMode), delta: 2.8, deltaLabel: "vs prev day", scopeColor: "bg-scope3" },
+    { title: "Intensity", value: "2.85", unit: intUnit(unitMode), delta: 1.8, deltaLabel: "vs prev day" },
+    { title: "Scope 1 Intensity", value: "1.77", unit: intUnit(unitMode), delta: 4.2, deltaLabel: "vs prev day", scopeColor: "bg-scope1" },
+    { title: "Scope 2 Intensity", value: "0.63", unit: intUnit(unitMode), delta: -1.2, deltaLabel: "vs prev day", scopeColor: "bg-scope2" },
+    { title: "Scope 3 Intensity", value: "0.46", unit: intUnit(unitMode), delta: 2.8, deltaLabel: "vs prev day", scopeColor: "bg-scope3" },
+    { title: "Scope 3 Mining Intensity", value: "0.22", unit: intUnit(unitMode), delta: 1.5, deltaLabel: "vs prev day", scopeColor: "bg-scope3" },
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
       {cards.map((card) => (
         <KPICard key={card.title} {...card} onClick={onKPIClick} />
       ))}
