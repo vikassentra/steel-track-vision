@@ -21,7 +21,7 @@ const DriverDetailModal = ({ driver, onClose }: DriverDetailModalProps) => {
 
   const metrics = [
     { label: "Specific Consumption", value: "0.42 t/t-steel", change: "+2.1%" },
-    { label: "Today's Consumption", value: "18.3 kWh/t", change: "-0.8%" },
+    { label: "Today's Consumption", value: "18.3 t", change: "-0.8%" },
     { label: "EF (kgCO2/unit)", value: "2.86", status: "normal" },
   ];
 
