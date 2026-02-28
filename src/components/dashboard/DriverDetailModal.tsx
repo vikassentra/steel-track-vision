@@ -3,6 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 
 interface DriverDetailModalProps {
   driver: string | null;
+  shop?: string | null;
   onClose: () => void;
 }
 
@@ -14,7 +15,7 @@ const generateMassShare = () =>
     return { date: day, share: +(Math.random() * 8 + 2).toFixed(1) };
   });
 
-const DriverDetailModal = ({ driver, onClose }: DriverDetailModalProps) => {
+const DriverDetailModal = ({ driver, shop, onClose }: DriverDetailModalProps) => {
   if (!driver) return null;
 
   const trend = generateMassShare();
@@ -36,7 +37,10 @@ const DriverDetailModal = ({ driver, onClose }: DriverDetailModalProps) => {
       <div className="absolute inset-0 bg-background/70" onClick={onClose} />
       <div className="relative bg-card border border-border rounded-xl shadow-2xl w-full max-w-lg p-5 animate-fade-in">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-foreground">Driver Detail: {driver}</h3>
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">Driver Detail: {driver}</h3>
+            {shop && <p className="text-xs text-muted-foreground">{shop}</p>}
+          </div>
           <div className="flex items-center gap-3">
             <span className="text-xs text-muted-foreground">{new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</span>
             <button onClick={onClose} className="p-1 rounded hover:bg-secondary transition-colors">

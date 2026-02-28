@@ -19,6 +19,7 @@ const intUnit = (mode: UnitMode) => mode === "energy" ? "TJ/t" : "kgCO2e/t";
 
 const DeviationDrawer = ({ open, onClose, selectedDate, unitMode }: DeviationDrawerProps) => {
   const [selectedDriver, setSelectedDriver] = useState<string | null>(null);
+  const [selectedShop, setSelectedShop] = useState<string | null>(null);
 
   if (!open) return null;
 
@@ -129,7 +130,7 @@ const DeviationDrawer = ({ open, onClose, selectedDate, unitMode }: DeviationDra
                   {driverDetails.map((row) => (
                     <tr
                       key={row.driver}
-                      onClick={() => setSelectedDriver(row.driver)}
+                      onClick={() => { setSelectedDriver(row.driver); setSelectedShop(row.shop); }}
                       className="border-t border-border hover:bg-secondary/50 cursor-pointer transition-colors"
                     >
                       <td className="p-2 text-foreground flex items-center gap-1.5">
@@ -158,7 +159,8 @@ const DeviationDrawer = ({ open, onClose, selectedDate, unitMode }: DeviationDra
 
       <DriverDetailModal
         driver={selectedDriver}
-        onClose={() => setSelectedDriver(null)}
+        shop={selectedShop}
+        onClose={() => { setSelectedDriver(null); setSelectedShop(null); }}
       />
     </>
   );
