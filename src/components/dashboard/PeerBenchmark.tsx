@@ -68,28 +68,35 @@ const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
         </div>
 
         <div className="space-y-3">
-          <div className="bg-secondary rounded-lg p-3 space-y-1">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Your Intensity</p>
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">Today</span>
-              <span className="text-foreground font-mono">{yourValue?.intensity} {u}</span>
-            </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">Previous Month</span>
-              <span className="text-foreground font-mono">2.78 {u}</span>
-            </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">FY 26</span>
-              <span className="text-foreground font-mono">2.81 {u}</span>
-            </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">FY 25</span>
-              <span className="text-foreground font-mono">2.92 {u}</span>
-            </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">FY 24</span>
-              <span className="text-foreground font-mono">3.05 {u}</span>
-            </div>
+          <div className="bg-secondary rounded-lg p-3">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Your Intensity</p>
+            <ResponsiveContainer width="100%" height={180}>
+              <BarChart data={[
+                { period: "FY 24", value: 3.05 },
+                { period: "FY 25", value: 2.92 },
+                { period: "FY 26", value: 2.81 },
+                { period: "Prev Mo", value: 2.78 },
+                { period: "Today", value: yourValue?.intensity ?? 2.85 },
+              ]} margin={{ top: 10, right: 5, bottom: 0, left: -15 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 18%)" horizontal={true} vertical={false} />
+                <XAxis dataKey="period" tick={{ fontSize: 9, fill: "hsl(215 15% 55%)" }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 9, fill: "hsl(215 15% 55%)" }} domain={[2.4, 3.2]} axisLine={false} tickLine={false} />
+                <Tooltip
+                  contentStyle={{
+                    background: "hsl(220 18% 15%)",
+                    border: "1px solid hsl(220 15% 22%)",
+                    borderRadius: 8,
+                    fontSize: 11
+                  }}
+                  formatter={(v: number) => [`${v} ${u}`, "Intensity"]}
+                />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <Cell key={i} fill={i === 4 ? "hsl(168 70% 50%)" : "hsl(215 15% 35%)"} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
           <div className="bg-secondary rounded-lg p-3 space-y-1">
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Benchmarks</p>
