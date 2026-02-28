@@ -44,16 +44,7 @@ const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
   return (
     <div className="bg-card rounded-lg border border-border p-5">
       {/* Header */}
-      <div className="flex items-center justify-between mb-5">
-        <div>
-          <h3 className="text-sm font-semibold text-foreground">
-            Peer Benchmark & Intensity Trend
-          </h3>
-          <p className="text-xs text-muted-foreground">
-            Intensity comparison ({u} crude steel)
-          </p>
-        </div>
-        
+      
 
 
 
@@ -62,7 +53,16 @@ const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
 
 
 
-      </div>
+
+
+
+
+
+
+
+
+
+
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
         {/* Left: Your Intensity Trend — vertical bar + line */}
