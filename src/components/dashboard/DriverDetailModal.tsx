@@ -20,8 +20,8 @@ const DriverDetailModal = ({ driver, onClose }: DriverDetailModalProps) => {
   const trend = generateMassShare();
 
   const metrics = [
-    { label: "Consumption Rate", value: "0.42 t/t-steel", status: "normal" },
-    { label: "Energy (kWh/t)", value: "18.3", status: "normal" },
+    { label: "Specific Consumption", value: "0.42 t/t-steel", change: "+2.1%" },
+    { label: "Today's Consumption", value: "18.3 kWh/t", change: "-0.8%" },
     { label: "EF (kgCO2/unit)", value: "2.86", status: "normal" },
   ];
 
@@ -70,6 +70,11 @@ const DriverDetailModal = ({ driver, onClose }: DriverDetailModalProps) => {
             <div key={m.label} className="bg-secondary rounded-lg p-2.5">
               <p className="text-[10px] text-muted-foreground">{m.label}</p>
               <p className="text-sm font-semibold text-foreground font-mono">{m.value}</p>
+              {"change" in m && m.change && (
+                <p className={`text-[10px] font-mono mt-0.5 ${m.change.startsWith("+") ? "text-chart-negative" : "text-chart-positive"}`}>
+                  {m.change} vs prev day
+                </p>
+              )}
             </div>
           ))}
         </div>
