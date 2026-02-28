@@ -26,6 +26,14 @@ const DriverDetailModal = ({ driver, shop, onClose }: DriverDetailModalProps) =>
     { label: "EF (kgCO2/unit)", value: "2.86", status: "normal" },
   ];
 
+  const historicalData = [
+    { period: "FY 24", value: "0.39" },
+    { period: "FY 25", value: "0.41" },
+    { period: "FY 26 A", value: "0.42" },
+    { period: "FY 26 B", value: "0.40" },
+    { period: "Prev Mo", value: "0.43" },
+  ];
+
   const flags = [
     { type: "ok", text: "Data received on time" },
     { type: "warning", text: "Manual override detected for Feb 26" },
@@ -72,8 +80,8 @@ const DriverDetailModal = ({ driver, shop, onClose }: DriverDetailModalProps) =>
         </div>
 
         {/* Metrics */}
-        <div className="grid grid-cols-3 gap-2 mb-4">
-          {metrics.map((m) => (
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          {metrics.slice(0, 2).map((m) => (
             <div key={m.label} className="bg-secondary rounded-lg p-2.5">
               <p className="text-[10px] text-muted-foreground">{m.label}</p>
               <p className="text-sm font-semibold text-foreground font-mono">{m.value}</p>
@@ -82,6 +90,26 @@ const DriverDetailModal = ({ driver, shop, onClose }: DriverDetailModalProps) =>
                   {m.change} vs prev day
                 </p>
               )}
+            </div>
+          ))}
+        </div>
+
+        {/* Historical Comparison */}
+        <div className="grid grid-cols-5 gap-1.5 mb-4">
+          {historicalData.map((h) => (
+            <div key={h.period} className="bg-secondary rounded-lg p-2 text-center">
+              <p className="text-[9px] text-muted-foreground">{h.period}</p>
+              <p className="text-xs font-semibold text-foreground font-mono">{h.value}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* EF tile */}
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          {metrics.slice(2).map((m) => (
+            <div key={m.label} className="bg-secondary rounded-lg p-2.5">
+              <p className="text-[10px] text-muted-foreground">{m.label}</p>
+              <p className="text-sm font-semibold text-foreground font-mono">{m.value}</p>
             </div>
           ))}
         </div>
