@@ -1,22 +1,23 @@
 import { X, AlertCircle, CheckCircle } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 interface DriverDetailModalProps {
   driver: string | null;
   onClose: () => void;
 }
 
-// Generate mock daily trend for a driver
-const generateDriverTrend = () =>
-  Array.from({ length: 14 }, (_, i) => ({
-    date: `Feb ${i + 15}`,
-    value: 200 + Math.random() * 100,
-  }));
+// Generate mock mass share data for last 30 days
+const generateMassShare = () =>
+  Array.from({ length: 30 }, (_, i) => {
+    const date = new Date(2025, 1, i + 1);
+    const day = date.toLocaleDateString("en", { month: "short", day: "numeric" });
+    return { date: day, share: +(Math.random() * 8 + 2).toFixed(1) };
+  });
 
 const DriverDetailModal = ({ driver, onClose }: DriverDetailModalProps) => {
   if (!driver) return null;
 
-  const trend = generateDriverTrend();
+  const trend = generateMassShare();
 
   const metrics = [
     { label: "Consumption Rate", value: "0.42 t/t-steel", status: "normal" },
@@ -43,12 +44,12 @@ const DriverDetailModal = ({ driver, onClose }: DriverDetailModalProps) => {
 
         {/* Trend */}
         <div className="mb-4">
-          <p className="text-xs text-muted-foreground mb-2">Daily trend (last 14 days)</p>
+          <p className="text-xs text-muted-foreground mb-2">Mass share, last 30 days</p>
           <ResponsiveContainer width="100%" height={160}>
-            <LineChart data={trend}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 18%)" />
-              <XAxis dataKey="date" tick={{ fontSize: 9, fill: "hsl(215 15% 55%)" }} />
-              <YAxis tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }} />
+            <BarChart data={trend}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 18%)" vertical={false} />
+              <XAxis dataKey="date" tick={{ fontSize: 8, fill: "hsl(215 15% 55%)" }} interval={4} />
+              <YAxis tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }} unit="%" />
               <Tooltip
                 contentStyle={{
                   background: "hsl(220 18% 15%)",
@@ -56,9 +57,10 @@ const DriverDetailModal = ({ driver, onClose }: DriverDetailModalProps) => {
                   borderRadius: 8,
                   fontSize: 12,
                 }}
+                formatter={(value: number) => [`${value}%`, "Share"]}
               />
-              <Line type="monotone" dataKey="value" stroke="hsl(168 70% 50%)" strokeWidth={2} dot={false} />
-            </LineChart>
+              <Bar dataKey="share" fill="hsl(168 70% 50%)" radius={[2, 2, 0, 0]} />
+            </BarChart>
           </ResponsiveContainer>
         </div>
 
