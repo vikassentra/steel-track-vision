@@ -1,94 +1,218 @@
 import { useState } from "react";
 import { peerBenchmarks, peerGroups } from "@/data/mockData";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from "recharts";
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, Cell, ReferenceLine, LabelList,
+  ComposedChart, Line, Scatter
+} from "recharts";
 import type { UnitMode } from "@/pages/Index";
 
 interface PeerBenchmarkProps {
   unitMode: UnitMode;
 }
 
-const intUnit = (mode: UnitMode) => mode === "energy" ? "TJ/t" : "tCO2e/t";
+const intUnit = (mode: UnitMode) => (mode === "energy" ? "TJ/t" : "tCO2e/t");
 
-const yourIntensityHistory = [
-  { name: "You (FY 24)", intensity: 3.05, type: "you-history" as const },
-  { name: "You (FY 25)", intensity: 2.92, type: "you-history" as const },
-  { name: "You (FY 26)", intensity: 2.81, type: "you-history" as const },
-  { name: "You (Prev Mo)", intensity: 2.78, type: "you-history" as const },
+const yourTrend = [
+  { period: "FY 24", value: 3.05 },
+  { period: "FY 25", value: 2.92 },
+  { period: "FY 26", value: 2.81 },
+  { period: "Prev Mo", value: 2.78 },
+  { period: "Today", value: 2.85 },
 ];
-
-const getBarColor = (type: string) => {
-  if (type === "you") return "hsl(168 70% 50%)";
-  if (type === "you-history") return "hsl(168 50% 38%)";
-  return "hsl(215 15% 35%)";
-};
 
 const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
   const [group, setGroup] = useState(peerGroups[0]);
   const u = intUnit(unitMode);
 
-  const yourValue = peerBenchmarks.find((p) => p.type === "you");
+  const peers = peerBenchmarks.filter((p) => p.type !== "you");
   const median = peerBenchmarks.find((p) => p.name === "Industry Median");
+  const peersSorted = [...peers].sort((a, b) => a.intensity - b.intensity);
 
-  // Merge peer data with your historical intensity, rename "You" to "You (Today)"
-  const combined = [
-    ...peerBenchmarks.filter((p) => p.type !== "you").map((p) => ({ ...p })),
-    ...yourIntensityHistory,
-    { name: "You (Today)", intensity: yourValue?.intensity ?? 2.85, type: "you" as const },
+  // Add "You (Today)" into the peer chart for direct comparison
+  const peerWithYou = [
+    ...peersSorted,
+    { name: "You (Today)", intensity: 2.85, type: "you" as const },
   ].sort((a, b) => a.intensity - b.intensity);
+
+  const tooltipStyle = {
+    background: "hsl(220 18% 12%)",
+    border: "1px solid hsl(220 15% 22%)",
+    borderRadius: 8,
+    fontSize: 11,
+    boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+  };
 
   return (
     <div className="bg-card rounded-lg border border-border p-5">
-      <div className="flex items-center justify-between mb-4">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-5">
         <div>
-          <h3 className="text-sm font-semibold text-foreground">Peer Benchmark & Your Intensity</h3>
-          <p className="text-xs text-muted-foreground">Intensity comparison ({u} crude steel)</p>
+          <h3 className="text-sm font-semibold text-foreground">
+            Peer Benchmark & Intensity Trend
+          </h3>
+          <p className="text-xs text-muted-foreground">
+            Intensity comparison ({u} crude steel)
+          </p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-4 text-[10px] text-muted-foreground">
-            <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded-sm" style={{ background: "hsl(168 70% 50%)" }} />You (Today)</span>
-            <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded-sm" style={{ background: "hsl(168 50% 38%)" }} />You (Historical)</span>
-            <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded-sm" style={{ background: "hsl(215 15% 35%)" }} />Peers</span>
-          </div>
-          <select
-            value={group}
-            onChange={(e) => setGroup(e.target.value)}
-            className="px-3 py-1.5 text-xs bg-secondary rounded-md text-secondary-foreground border-none outline-none cursor-pointer">
-            {peerGroups.map((g) =>
-              <option key={g} value={g}>{g}</option>
-            )}
-          </select>
-        </div>
+        <select
+          value={group}
+          onChange={(e) => setGroup(e.target.value)}
+          className="px-3 py-1.5 text-xs bg-secondary rounded-md text-secondary-foreground border-none outline-none cursor-pointer"
+        >
+          {peerGroups.map((g) => (
+            <option key={g} value={g}>{g}</option>
+          ))}
+        </select>
       </div>
 
-      <ResponsiveContainer width="100%" height={400}>
-        <BarChart data={combined} layout="vertical" margin={{ left: 100, right: 20 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 18%)" horizontal={false} />
-          <XAxis type="number" tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }} domain={[0, 3.5]} />
-          <YAxis dataKey="name" type="category" tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }} width={100} />
-          <Tooltip
-            contentStyle={{
-              background: "hsl(220 18% 15%)",
-              border: "1px solid hsl(220 15% 22%)",
-              borderRadius: 8,
-              fontSize: 12
-            }}
-            formatter={(v: number) => [`${v} ${u}`]} />
-          {median &&
-            <ReferenceLine x={median.intensity} stroke="hsl(330 80% 60%)" strokeDasharray="4 4" label={{ value: "Median", fontSize: 10, fill: "hsl(330 80% 60%)" }} />
-          }
-          <Bar dataKey="intensity" radius={[0, 4, 4, 0]}>
-            {combined.map((entry) =>
-              <Cell key={entry.name} fill={getBarColor(entry.type)} />
-            )}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+        {/* Left: Your Intensity Trend — vertical bar + line */}
+        <div className="lg:col-span-2">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
+              Your Intensity Trend
+            </p>
+            <div className="flex items-center gap-2 text-[9px] text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <span className="inline-block w-2 h-2 rounded-sm" style={{ background: "hsl(168 70% 50%)" }} />
+                Current
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="inline-block w-2 h-2 rounded-sm" style={{ background: "hsl(168 40% 32%)" }} />
+                Historical
+              </span>
+            </div>
+          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <ComposedChart data={yourTrend} margin={{ top: 20, right: 10, bottom: 5, left: -10 }}>
+              <defs>
+                <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(168 70% 50%)" stopOpacity={0.9} />
+                  <stop offset="100%" stopColor="hsl(168 50% 35%)" stopOpacity={0.7} />
+                </linearGradient>
+                <linearGradient id="barGradientHist" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(168 40% 38%)" stopOpacity={0.7} />
+                  <stop offset="100%" stopColor="hsl(168 30% 25%)" stopOpacity={0.5} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 16%)" vertical={false} />
+              <XAxis
+                dataKey="period"
+                tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }}
+                domain={[2.4, 3.2]}
+                axisLine={false}
+                tickLine={false}
+              />
+              <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v} ${u}`, "Intensity"]} />
+              <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={36}>
+                <LabelList dataKey="value" position="top" style={{ fontSize: 10, fill: "hsl(215 15% 65%)", fontFamily: "monospace" }} />
+                {yourTrend.map((_, i) => (
+                  <Cell
+                    key={i}
+                    fill={i === yourTrend.length - 1 ? "url(#barGradient)" : "url(#barGradientHist)"}
+                  />
+                ))}
+              </Bar>
+              <Line
+                type="monotone"
+                dataKey="value"
+                stroke="hsl(330 80% 60%)"
+                strokeWidth={2}
+                dot={false}
+                strokeDasharray="4 4"
+              />
+              <Scatter dataKey="value" fill="hsl(330 80% 60%)" r={3} />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Right: Peer Comparison — horizontal bars */}
+        <div className="lg:col-span-3">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
+              Peer Comparison
+            </p>
+            <div className="flex items-center gap-2 text-[9px] text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <span className="inline-block w-2 h-2 rounded-sm" style={{ background: "hsl(168 70% 50%)" }} />
+                You
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="inline-block w-2 h-2 rounded-full" style={{ background: "hsl(215 20% 45%)" }} />
+                Peers
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="inline-block w-3 h-0.5" style={{ background: "hsl(330 80% 60%)" }} />
+                Median
+              </span>
+            </div>
+          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={peerWithYou} layout="vertical" margin={{ left: 90, right: 30 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 16%)" horizontal={false} />
+              <XAxis
+                type="number"
+                tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }}
+                domain={[0, 3.5]}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                dataKey="name"
+                type="category"
+                tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }}
+                width={90}
+                axisLine={false}
+                tickLine={false}
+              />
+              <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v} ${u}`]} />
+              {median && (
+                <ReferenceLine
+                  x={median.intensity}
+                  stroke="hsl(330 80% 60%)"
+                  strokeDasharray="4 4"
+                  label={{
+                    value: `Median ${median.intensity}`,
+                    fontSize: 9,
+                    fill: "hsl(330 80% 60%)",
+                    position: "top",
+                  }}
+                />
+              )}
+              <Bar dataKey="intensity" radius={[0, 6, 6, 0]} barSize={20}>
+                <LabelList
+                  dataKey="intensity"
+                  position="right"
+                  style={{ fontSize: 9, fill: "hsl(215 15% 55%)", fontFamily: "monospace" }}
+                />
+                {peerWithYou.map((entry) => (
+                  <Cell
+                    key={entry.name}
+                    fill={
+                      entry.type === "you"
+                        ? "hsl(168 70% 50%)"
+                        : "hsl(215 20% 35%)"
+                    }
+                    opacity={entry.type === "you" ? 1 : 0.7}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
 
       <p className="text-[10px] text-muted-foreground italic leading-relaxed mt-3">
         Benchmark is normalized by route/grade where possible. Data sources: WSA, company reports.
       </p>
-    </div>);
-
+    </div>
+  );
 };
 
 export default PeerBenchmark;
