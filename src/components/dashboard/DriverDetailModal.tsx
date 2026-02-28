@@ -9,11 +9,11 @@ interface DriverDetailModalProps {
 
 // Generate mock mass share data for last 30 days
 const generateMassShare = () =>
-  Array.from({ length: 30 }, (_, i) => {
-    const date = new Date(2025, 1, i + 1);
-    const day = date.toLocaleDateString("en", { month: "short", day: "numeric" });
-    return { date: day, share: +(Math.random() * 8 + 2).toFixed(1) };
-  });
+Array.from({ length: 30 }, (_, i) => {
+  const date = new Date(2025, 1, i + 1);
+  const day = date.toLocaleDateString("en", { month: "short", day: "numeric" });
+  return { date: day, share: +(Math.random() * 8 + 2).toFixed(1) };
+});
 
 const DriverDetailModal = ({ driver, shop, onClose }: DriverDetailModalProps) => {
   if (!driver) return null;
@@ -21,24 +21,24 @@ const DriverDetailModal = ({ driver, shop, onClose }: DriverDetailModalProps) =>
   const trend = generateMassShare();
 
   const metrics = [
-    { label: "Specific Consumption", value: "0.42 t/t-steel", change: "+2.1%" },
-    { label: "Today's Consumption", value: "18.3 t", change: "-0.8%" },
-    { label: "EF (kgCO2/unit)", value: "2.86", status: "normal" },
-  ];
+  { label: "Specific Consumption", value: "0.42 t/t-steel", change: "+2.1%" },
+  { label: "Today's Consumption", value: "18.3 t", change: "-0.8%" },
+  { label: "EF (kgCO2/unit)", value: "2.86", status: "normal" }];
+
 
   const historicalData = [
-    { period: "FY 24", cons: "16.8 t", spCons: "0.39 t/t" },
-    { period: "FY 25", cons: "17.5 t", spCons: "0.41 t/t" },
-    { period: "FY 26 A", cons: "18.0 t", spCons: "0.42 t/t" },
-    { period: "FY 26 B", cons: "17.2 t", spCons: "0.40 t/t" },
-    { period: "Prev Mo", cons: "18.6 t", spCons: "0.43 t/t" },
-  ];
+  { period: "FY 24", cons: "16.8 t", spCons: "0.39 t/t" },
+  { period: "FY 25", cons: "17.5 t", spCons: "0.41 t/t" },
+  { period: "FY 26 A", cons: "18.0 t", spCons: "0.42 t/t" },
+  { period: "FY 26 B", cons: "17.2 t", spCons: "0.40 t/t" },
+  { period: "Prev Mo", cons: "18.6 t", spCons: "0.43 t/t" }];
+
 
   const flags = [
-    { type: "ok", text: "Data received on time" },
-    { type: "warning", text: "Manual override detected for Feb 26" },
-    
-  ];
+  { type: "ok", text: "Data received on time" },
+  { type: "warning", text: "Manual override detected for Feb 26" }];
+
+
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center">
@@ -59,7 +59,7 @@ const DriverDetailModal = ({ driver, shop, onClose }: DriverDetailModalProps) =>
 
         {/* Trend */}
         <div className="mb-4">
-          <p className="text-xs text-muted-foreground mb-2">Mass share, last 30 days</p>
+          <p className="text-xs text-muted-foreground mb-2">Last 30 days trend</p>
           <ResponsiveContainer width="100%" height={160}>
             <BarChart data={trend}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 18%)" vertical={false} />
@@ -70,10 +70,10 @@ const DriverDetailModal = ({ driver, shop, onClose }: DriverDetailModalProps) =>
                   background: "hsl(220 18% 15%)",
                   border: "1px solid hsl(220 15% 22%)",
                   borderRadius: 8,
-                  fontSize: 12,
+                  fontSize: 12
                 }}
-                formatter={(value: number) => [`${value}%`, "Share"]}
-              />
+                formatter={(value: number) => [`${value}%`, "Share"]} />
+
               <Bar dataKey="share" fill="hsl(168 70% 50%)" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -81,17 +81,17 @@ const DriverDetailModal = ({ driver, shop, onClose }: DriverDetailModalProps) =>
 
         {/* Metrics */}
         <div className="grid grid-cols-2 gap-2 mb-4">
-          {metrics.slice(0, 2).map((m) => (
-            <div key={m.label} className="bg-secondary rounded-lg p-2.5">
+          {metrics.slice(0, 2).map((m) =>
+          <div key={m.label} className="bg-secondary rounded-lg p-2.5">
               <p className="text-[10px] text-muted-foreground">{m.label}</p>
               <p className="text-sm font-semibold text-foreground font-mono">{m.value}</p>
-              {"change" in m && m.change && (
-                <p className={`text-[10px] font-mono mt-0.5 ${m.change.startsWith("+") ? "text-chart-negative" : "text-chart-positive"}`}>
+              {"change" in m && m.change &&
+            <p className={`text-[10px] font-mono mt-0.5 ${m.change.startsWith("+") ? "text-chart-negative" : "text-chart-positive"}`}>
                   {m.change} vs prev day
                 </p>
-              )}
+            }
             </div>
-          ))}
+          )}
         </div>
 
         {/* Historical Comparison */}
@@ -99,54 +99,54 @@ const DriverDetailModal = ({ driver, shop, onClose }: DriverDetailModalProps) =>
           <div className="grid grid-cols-[auto_repeat(5,1fr)] gap-x-3 gap-y-1 items-center text-center">
             {/* Header row */}
             <div />
-            {historicalData.map((h) => (
-              <p key={h.period} className="text-[9px] text-muted-foreground font-medium">{h.period}</p>
-            ))}
+            {historicalData.map((h) =>
+            <p key={h.period} className="text-[9px] text-muted-foreground font-medium">{h.period}</p>
+            )}
             {/* Cons row */}
             <p className="text-[9px] text-muted-foreground text-left">Cons.</p>
-            {historicalData.map((h) => (
-              <p key={h.period + "-c"} className="text-[10px] font-semibold text-foreground font-mono">{h.cons}</p>
-            ))}
+            {historicalData.map((h) =>
+            <p key={h.period + "-c"} className="text-[10px] font-semibold text-foreground font-mono">{h.cons}</p>
+            )}
             {/* Sp. Cons row */}
             <p className="text-[9px] text-muted-foreground text-left">Sp. Cons</p>
-            {historicalData.map((h) => (
-              <p key={h.period + "-s"} className="text-[10px] font-semibold text-foreground font-mono">{h.spCons}</p>
-            ))}
+            {historicalData.map((h) =>
+            <p key={h.period + "-s"} className="text-[10px] font-semibold text-foreground font-mono">{h.spCons}</p>
+            )}
           </div>
         </div>
 
         {/* EF tile */}
         <div className="grid grid-cols-2 gap-2 mb-4">
-          {metrics.slice(2).map((m) => (
-            <div key={m.label} className="bg-secondary rounded-lg p-2.5">
+          {metrics.slice(2).map((m) =>
+          <div key={m.label} className="bg-secondary rounded-lg p-2.5">
               <p className="text-[10px] text-muted-foreground">{m.label}</p>
               <p className="text-sm font-semibold text-foreground font-mono">{m.value}</p>
-              {m.label === "EF (kgCO2/unit)" && (
-                <p className="text-[9px] text-muted-foreground mt-1">Source: IPCC 2019</p>
-              )}
+              {m.label === "EF (kgCO2/unit)" &&
+            <p className="text-[9px] text-muted-foreground mt-1">Source: IPCC 2019</p>
+            }
             </div>
-          ))}
+          )}
         </div>
 
         {/* Data Quality Flags */}
         <div>
           <p className="text-xs font-medium text-muted-foreground mb-2">Data Quality</p>
           <div className="space-y-1.5">
-            {flags.map((f, i) => (
-              <div key={i} className="flex items-center gap-2 text-xs">
-                {f.type === "ok" ? (
-                  <CheckCircle className="w-3.5 h-3.5 text-chart-positive" />
-                ) : (
-                  <AlertCircle className="w-3.5 h-3.5 text-accent" />
-                )}
+            {flags.map((f, i) =>
+            <div key={i} className="flex items-center gap-2 text-xs">
+                {f.type === "ok" ?
+              <CheckCircle className="w-3.5 h-3.5 text-chart-positive" /> :
+
+              <AlertCircle className="w-3.5 h-3.5 text-accent" />
+              }
                 <span className="text-muted-foreground">{f.text}</span>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default DriverDetailModal;
