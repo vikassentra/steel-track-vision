@@ -9,6 +9,8 @@ import DriverDetailModal from "@/components/dashboard/DriverDetailModal";
 import ShopDetailModal from "@/components/dashboard/ShopDetailModal";
 import RunAnalyticsModal from "@/components/dashboard/RunAnalyticsModal";
 import SentraAIModal from "@/components/dashboard/SentraAIModal";
+import AllMetricsModal from "@/components/dashboard/AllMetricsModal";
+import MetricDetailModal from "@/components/dashboard/MetricDetailModal";
 import { plants } from "@/data/mockData";
 
 export type UnitMode = "emissions" | "energy";
@@ -25,6 +27,8 @@ const Index = () => {
   const [selectedShop, setSelectedShop] = useState<string | null>(null);
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const [sentraAIOpen, setSentraAIOpen] = useState(false);
+  const [allMetricsOpen, setAllMetricsOpen] = useState(false);
+  const [selectedMetric, setSelectedMetric] = useState<{ title: string; value: string; unit: string; delta: number } | null>(null);
 
   const handlePointClick = (date: string) => {
     setSelectedDate(date);
@@ -98,7 +102,12 @@ const Index = () => {
         </div>
 
       {/* KPI Cards */}
-        <KPICardsRow onKPIClick={() => setDrawerOpen(true)} unitMode={unitMode} />
+        <KPICardsRow
+          onKPIClick={() => setDrawerOpen(true)}
+          unitMode={unitMode}
+          onMetricClick={(m) => setSelectedMetric(m)}
+          onSeeAllMetrics={() => setAllMetricsOpen(true)}
+        />
 
         {/* Breakdown Panels */}
         <BreakdownPanels
@@ -146,8 +155,21 @@ const Index = () => {
       {/* sentra.AI Modal */}
       <SentraAIModal open={sentraAIOpen} onClose={() => setSentraAIOpen(false)} />
 
-    </div>);
+      {/* All Metrics Modal */}
+      <AllMetricsModal
+        open={allMetricsOpen}
+        onClose={() => setAllMetricsOpen(false)}
+        onMetricClick={(m) => { setAllMetricsOpen(false); setSelectedMetric(m); }}
+      />
 
+      {/* Metric Detail Modal */}
+      <MetricDetailModal
+        metric={selectedMetric}
+        onClose={() => setSelectedMetric(null)}
+      />
+
+    </div>
+  );
 };
 
 export default Index;
