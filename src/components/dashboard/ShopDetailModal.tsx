@@ -162,8 +162,8 @@ const ShopDetailModal = ({ shop, onClose }: ShopDetailModalProps) => {
                   <div
                     key={row.driver}
                     onClick={() => setSelectedDriver(row.driver)}
-                    className="grid grid-cols-2 gap-x-3 cursor-pointer hover:bg-secondary/30 rounded px-1 transition-colors"
-                    style={{ height: "32px", display: "flex", alignItems: "center" }}
+                    className="grid grid-cols-2 gap-x-3 cursor-pointer hover:bg-secondary/30 rounded px-1 transition-colors items-center"
+                    style={{ height: "32px" }}
                   >
                     <p className="text-[11px] font-mono text-foreground text-right">{row.valueChange}</p>
                     <p className={`text-[11px] font-mono font-semibold text-right ${row.emissionsChange > 0 ? "text-red-400" : "text-emerald-400"}`}>
