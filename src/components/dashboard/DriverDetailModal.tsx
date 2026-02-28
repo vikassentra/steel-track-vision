@@ -37,9 +37,12 @@ const DriverDetailModal = ({ driver, onClose }: DriverDetailModalProps) => {
       <div className="relative bg-card border border-border rounded-xl shadow-2xl w-full max-w-lg p-5 animate-fade-in">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-semibold text-foreground">Driver Detail: {driver}</h3>
-          <button onClick={onClose} className="p-1 rounded hover:bg-secondary transition-colors">
-            <X className="w-4 h-4 text-muted-foreground" />
-          </button>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-muted-foreground">{new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</span>
+            <button onClick={onClose} className="p-1 rounded hover:bg-secondary transition-colors">
+              <X className="w-4 h-4 text-muted-foreground" />
+            </button>
+          </div>
         </div>
 
         {/* Trend */}
