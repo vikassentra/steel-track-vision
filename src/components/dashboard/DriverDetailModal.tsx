@@ -34,7 +34,8 @@ const DriverDetailModal = ({ driver, shop, onClose }: DriverDetailModalProps) =>
   { period: "FY 25", cons: "17.5 t", spCons: "0.41 t/t" },
   { period: "FY 26 A", cons: "18.0 t", spCons: "0.42 t/t" },
   { period: "FY 26 B", cons: "17.2 t", spCons: "0.40 t/t" },
-  { period: "Prev Mo", cons: "18.6 t", spCons: "0.43 t/t" }];
+  { period: "Prev Mo", cons: "18.6 t", spCons: "0.43 t/t" },
+  { period: "Best in Class", cons: "14.2 t", spCons: "0.34 t/t" }];
 
 
   const flags = [
@@ -125,7 +126,8 @@ const DriverDetailModal = ({ driver, shop, onClose }: DriverDetailModalProps) =>
 
         {/* Historical Comparison */}
         <div className="bg-secondary rounded-lg p-3 mb-4">
-          <div className="grid grid-cols-[auto_repeat(5,1fr)] gap-x-3 gap-y-1 items-center text-center">
+          <p className="text-xs font-medium text-muted-foreground mb-2">Your Value & Peer Benchmark</p>
+          <div className="grid grid-cols-[auto_repeat(6,1fr)] gap-x-3 gap-y-1 items-center text-center">
             <div />
             {historicalData.map((h) =>
             <p key={h.period} className="text-[9px] text-muted-foreground font-medium">{h.period}</p>
