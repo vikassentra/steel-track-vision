@@ -49,47 +49,47 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <FilterBar
         activeFilters={activeFilters}
-        onRemoveFilter={handleRemoveFilter}
-      />
+        onRemoveFilter={handleRemoveFilter} />
+
 
       <div className="p-6 space-y-4 max-w-[1600px] mx-auto">
         {/* Plant toggles + Unit toggle */}
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex bg-secondary rounded-md p-0.5">
-            {plantsWithoutAll.map((p) => (
-              <button
-                key={p}
-                onClick={() => setActivePlant(p)}
-                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
-                  activePlant === p
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
+            {plantsWithoutAll.map((p) =>
+            <button
+              key={p}
+              onClick={() => setActivePlant(p)}
+              className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+              activePlant === p ?
+              "bg-primary text-primary-foreground" :
+              "text-muted-foreground hover:text-foreground"}`
+              }>
+
                 {p}
               </button>
-            ))}
+            )}
           </div>
           <div className="flex bg-secondary rounded-md p-0.5">
-            {(["emissions", "energy"] as const).map((mode) => (
-              <button
-                key={mode}
-                onClick={() => setUnitMode(mode)}
-                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
-                  unitMode === mode
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
+            {(["emissions", "energy"] as const).map((mode) =>
+            <button
+              key={mode}
+              onClick={() => setUnitMode(mode)}
+              className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+              unitMode === mode ?
+              "bg-accent text-accent-foreground" :
+              "text-muted-foreground hover:text-foreground"}`
+              }>
+
                 {mode === "emissions" ? "Emissions" : "Energy"}
               </button>
-            ))}
+            )}
           </div>
         </div>
 
         {/* Page Title */}
         <div>
-          <h2 className="text-lg font-bold text-foreground">Emissions Overview</h2>
+          
           <p className="text-xs text-muted-foreground">Carbon footprint monitoring · Steel Co. · {activePlant}</p>
         </div>
 
@@ -104,8 +104,8 @@ const Index = () => {
           onShopClick={handleShopClick}
           onScopeClick={handleScopeClick}
           activeScope={activeScope}
-          unitMode={unitMode}
-        />
+          unitMode={unitMode} />
+
 
         {/* Peer Benchmark */}
         <PeerBenchmark unitMode={unitMode} />
@@ -121,10 +121,10 @@ const Index = () => {
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         selectedDate={selectedDate}
-        unitMode={unitMode}
-      />
-    </div>
-  );
+        unitMode={unitMode} />
+
+    </div>);
+
 };
 
 export default Index;
