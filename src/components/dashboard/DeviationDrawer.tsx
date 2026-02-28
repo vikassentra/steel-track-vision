@@ -22,15 +22,27 @@ const DeviationDrawer = ({ open, onClose, selectedDate, unitMode }: DeviationDra
 
   if (!open) return null;
 
-  const waterfallChartData = waterfallData.map((item) => ({
-    name: item.name,
-    value: item.type === "total" ? item.value : Math.abs(item.value),
-    fill: item.type === "total"
-      ? "hsl(215 15% 40%)"
-      : item.value > 0
-      ? "hsl(0 72% 55%)"
-      : "hsl(168 70% 50%)",
-  }));
+  // Build true waterfall data with invisible base + visible segment
+  const waterfallChartData = (() => {
+    let running = 0;
+    return waterfallData.map((item) => {
+      if (item.type === "total") {
+        const result = { name: item.name, base: 0, value: item.value, fill: "hsl(215 15% 40%)" };
+        running = item.value;
+        return result;
+      }
+      const absVal = Math.abs(item.value);
+      const fill = item.value > 0 ? "hsl(0 72% 55%)" : "hsl(168 70% 50%)";
+      if (item.value > 0) {
+        const result = { name: item.name, base: running, value: absVal, fill };
+        running += absVal;
+        return result;
+      } else {
+        running -= absVal;
+        return { name: item.name, base: running, value: absVal, fill };
+      }
+    });
+  })();
 
   return (
     <>
@@ -66,10 +78,10 @@ const DeviationDrawer = ({ open, onClose, selectedDate, unitMode }: DeviationDra
           <div>
             <h3 className="text-xs font-semibold text-foreground mb-3">Contribution Waterfall</h3>
             <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={waterfallChartData}>
+              <BarChart data={waterfallChartData} barCategoryGap="20%">
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 18%)" />
                 <XAxis dataKey="name" tick={{ fontSize: 9, fill: "hsl(215 15% 55%)" }} angle={-20} textAnchor="end" height={50} />
-                <YAxis tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }} />
+                <YAxis tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }} domain={['auto', 'auto']} />
                 <Tooltip
                   contentStyle={{
                     background: "hsl(220 18% 15%)",
@@ -77,8 +89,13 @@ const DeviationDrawer = ({ open, onClose, selectedDate, unitMode }: DeviationDra
                     borderRadius: 8,
                     fontSize: 12,
                   }}
+                  formatter={(value: number, name: string) => {
+                    if (name === "base") return [null, null];
+                    return [value, "Change"];
+                  }}
                 />
-                <Bar dataKey="value" radius={[3, 3, 0, 0]}>
+                <Bar dataKey="base" stackId="waterfall" fill="transparent" radius={0} />
+                <Bar dataKey="value" stackId="waterfall" radius={[3, 3, 0, 0]}>
                   {waterfallChartData.map((entry, idx) => (
                     <Cell key={idx} fill={entry.fill} />
                   ))}
