@@ -91,12 +91,7 @@ const Index = () => {
 
       {/* KPI Cards */}
         <KPICardsRow onKPIClick={() => setDrawerOpen(true)} unitMode={unitMode} />
-      </div>
 
-      {/* Trend Chart - full width edge to edge */}
-      <TrendChart onPointClick={handlePointClick} unitMode={unitMode} />
-
-      <div className="p-6 space-y-4 max-w-[1600px] mx-auto">
         {/* Breakdown Panels */}
         <BreakdownPanels
           onShopClick={handleShopClick}
@@ -104,10 +99,14 @@ const Index = () => {
           activeScope={activeScope}
           unitMode={unitMode} />
 
-
         {/* Peer Benchmark */}
         <PeerBenchmark unitMode={unitMode} />
+      </div>
 
+      {/* Trend Chart - full width edge to edge, after Peer Benchmark */}
+      <TrendChart onPointClick={handlePointClick} unitMode={unitMode} />
+
+      <div className="p-6 max-w-[1600px] mx-auto">
         {/* Footer */}
         <div className="text-center py-4">
           <p className="text-[10px] text-muted-foreground">© sentra.world 2026 · Data refreshed daily · All values in tCO2e unless noted</p>
