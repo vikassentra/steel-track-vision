@@ -75,12 +75,14 @@ const KPICard = ({ title, value, unit, delta, deltaLabel, scopeColor, onClick, s
 interface KPICardsRowProps {
   onKPIClick: () => void;
   unitMode: UnitMode;
+  onMetricClick?: (metric: { title: string; value: string; unit: string; delta: number }) => void;
+  onSeeAllMetrics?: () => void;
 }
 
 const absUnit = (mode: UnitMode) => mode === "energy" ? "TJ" : "tCO2e";
 const intUnit = (mode: UnitMode) => mode === "energy" ? "TJ/t" : "tCO2e/t";
 
-const KPICardsRow = ({ onKPIClick, unitMode }: KPICardsRowProps) => {
+const KPICardsRow = ({ onKPIClick, unitMode, onMetricClick, onSeeAllMetrics }: KPICardsRowProps) => {
   const iU = intUnit(unitMode);
 
   const intensityScopeBreakdown = [
@@ -90,20 +92,48 @@ const KPICardsRow = ({ onKPIClick, unitMode }: KPICardsRowProps) => {
     { label: "S3+Mining", value: "0.22", unit: iU },
   ];
 
-  const cards: (KPICardProps & { scopeBreakdown?: { label: string; value: string; unit: string }[] })[] = [
+  const mainCards: (KPICardProps & { scopeBreakdown?: { label: string; value: string; unit: string }[] })[] = [
     { title: "Total Emissions", value: "13,650", unit: absUnit(unitMode), delta: 3.4, deltaLabel: "vs prev day" },
     { title: "Production", value: "4,789", unit: "tonnes", delta: 2.1, deltaLabel: "vs prev day" },
     { title: "Intensity", value: "2.85", unit: iU, delta: 1.8, deltaLabel: "vs prev day", scopeBreakdown: intensityScopeBreakdown },
+  ];
+
+  const paramCards: (KPICardProps & { scopeBreakdown?: { label: string; value: string; unit: string }[] })[] = [
     { title: "Coke Rate", value: "385", unit: "kg/t", delta: 2.4, deltaLabel: "vs prev day" },
     { title: "Renewable Elec.", value: "18.5", unit: "%", delta: -3.1, deltaLabel: "vs prev day" },
     { title: "Scrap Rate", value: "12.3", unit: "%", delta: -1.5, deltaLabel: "vs prev day" },
   ];
 
+  const handleParamClick = (card: typeof paramCards[0]) => {
+    if (onMetricClick) {
+      onMetricClick({ title: card.title, value: card.value, unit: card.unit, delta: card.delta });
+    } else {
+      onKPIClick();
+    }
+  };
+
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-      {cards.map((card) => (
-        <KPICard key={card.title} {...card} onClick={onKPIClick} />
-      ))}
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-3">
+        {mainCards.map((card) => (
+          <KPICard key={card.title} {...card} onClick={onKPIClick} />
+        ))}
+      </div>
+
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Key Parameters</p>
+        {onSeeAllMetrics && (
+          <button onClick={onSeeAllMetrics} className="text-[11px] text-primary hover:text-primary/80 font-medium transition-colors">
+            See All →
+          </button>
+        )}
+      </div>
+
+      <div className="grid grid-cols-3 gap-3">
+        {paramCards.map((card) => (
+          <KPICard key={card.title} {...card} onClick={() => handleParamClick(card)} />
+        ))}
+      </div>
     </div>
   );
 };
