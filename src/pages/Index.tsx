@@ -7,6 +7,8 @@ import DeviationDrawer from "@/components/dashboard/DeviationDrawer";
 import PeerBenchmark from "@/components/dashboard/PeerBenchmark";
 import DriverDetailModal from "@/components/dashboard/DriverDetailModal";
 import ShopDetailModal from "@/components/dashboard/ShopDetailModal";
+import RunAnalyticsModal from "@/components/dashboard/RunAnalyticsModal";
+import SentraAIModal from "@/components/dashboard/SentraAIModal";
 import { plants } from "@/data/mockData";
 
 export type UnitMode = "emissions" | "energy";
@@ -21,6 +23,8 @@ const Index = () => {
   const [activeShop, setActiveShop] = useState("BF");
   const [selectedDriver, setSelectedDriver] = useState<string | null>(null);
   const [selectedShop, setSelectedShop] = useState<string | null>(null);
+  const [analyticsOpen, setAnalyticsOpen] = useState(false);
+  const [sentraAIOpen, setSentraAIOpen] = useState(false);
 
   const handlePointClick = (date: string) => {
     setSelectedDate(date);
@@ -49,7 +53,9 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <FilterBar
         activeFilters={activeFilters}
-        onRemoveFilter={handleRemoveFilter} />
+        onRemoveFilter={handleRemoveFilter}
+        onOpenAnalytics={() => setAnalyticsOpen(true)}
+        onOpenSentraAI={() => setSentraAIOpen(true)} />
 
 
       <div className="p-6 space-y-4 max-w-[1600px] mx-auto">
@@ -133,6 +139,12 @@ const Index = () => {
       <ShopDetailModal
         shop={selectedShop}
         onClose={() => setSelectedShop(null)} />
+
+      {/* Run Analytics Modal */}
+      <RunAnalyticsModal open={analyticsOpen} onClose={() => setAnalyticsOpen(false)} />
+
+      {/* sentra.AI Modal */}
+      <SentraAIModal open={sentraAIOpen} onClose={() => setSentraAIOpen(false)} />
 
     </div>);
 
