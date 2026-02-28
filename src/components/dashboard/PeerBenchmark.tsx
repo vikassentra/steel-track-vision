@@ -132,7 +132,7 @@ const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
 
         {/* Right: Peer Comparison — horizontal bars */}
         <div className="lg:col-span-3">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-3" style={{ paddingLeft: 90 }}>
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
               Peer Comparison
             </p>
