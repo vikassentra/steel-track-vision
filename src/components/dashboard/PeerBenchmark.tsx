@@ -18,7 +18,8 @@ const yourTrend = [
 { period: "FY 25", value: 2.92 },
 { period: "FY 26", value: 2.81 },
 { period: "Prev Mo", value: 2.78 },
-{ period: "Today", value: 2.85 }];
+{ period: "Today", value: 2.85 },
+{ period: "FY28 Target", value: 2.10 }];
 
 
 const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
@@ -67,6 +68,10 @@ const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
                 <span className="inline-block w-2 h-2 rounded-sm" style={{ background: "hsl(168 40% 32%)" }} />
                 Historical
               </span>
+              <span className="flex items-center gap-1">
+                <span className="inline-block w-2 h-2 rounded-sm border border-dashed" style={{ background: "hsl(168 70% 50% / 0.3)", borderColor: "hsl(168 70% 50%)" }} />
+                Target
+              </span>
             </div>
           </div>
           <ResponsiveContainer width="100%" height={300}>
@@ -79,6 +84,10 @@ const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
                 <linearGradient id="barGradientHist" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="hsl(168 40% 38%)" stopOpacity={0.7} />
                   <stop offset="100%" stopColor="hsl(168 30% 25%)" stopOpacity={0.5} />
+                </linearGradient>
+                <linearGradient id="barGradientTarget" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(168 70% 50%)" stopOpacity={0.4} />
+                  <stop offset="100%" stopColor="hsl(168 50% 35%)" stopOpacity={0.25} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 16%)" vertical={false} />
@@ -97,11 +106,13 @@ const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
               <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v} ${u}`, "Intensity"]} />
               <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={36}>
                 <LabelList dataKey="value" position="top" style={{ fontSize: 10, fill: "hsl(215 15% 65%)", fontFamily: "monospace" }} />
-                {yourTrend.map((_, i) =>
+                {yourTrend.map((entry, i) =>
                 <Cell
                   key={i}
-                  fill={i === yourTrend.length - 1 ? "url(#barGradient)" : "url(#barGradientHist)"} />
-
+                  fill={i === yourTrend.length - 1 ? "url(#barGradientTarget)" : i === yourTrend.length - 2 ? "url(#barGradient)" : "url(#barGradientHist)"}
+                  stroke={i === yourTrend.length - 1 ? "hsl(168 70% 50%)" : "none"}
+                  strokeWidth={i === yourTrend.length - 1 ? 1 : 0}
+                  strokeDasharray={i === yourTrend.length - 1 ? "4 2" : "0"} />
                 )}
               </Bar>
               <Line
@@ -163,16 +174,7 @@ const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
                   fill: "hsl(330 80% 60%)",
                   position: "top"
                 }} />
-              <ReferenceLine
-                x={2.1}
-                stroke="hsl(168 70% 50%)"
-                strokeDasharray="4 4"
-                label={{
-                  value: "FY28 Target 2.10",
-                  fontSize: 9,
-                  fill: "hsl(168 70% 50%)",
-                  position: "top"
-                }} />
+
 
               <Bar dataKey="intensity" radius={[0, 6, 6, 0]} barSize={20}>
                 <LabelList
