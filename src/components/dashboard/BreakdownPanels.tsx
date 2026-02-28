@@ -7,6 +7,7 @@ import type { UnitMode } from "@/pages/Index";
 interface BreakdownPanelsProps {
   onShopClick: (shop: string) => void;
   onScopeClick: (scope: string) => void;
+  onDriverClick?: (driver: string) => void;
   activeScope: string;
   unitMode: UnitMode;
 }
@@ -76,7 +77,7 @@ const DriverTooltip = ({ active, payload }: any) => {
   );
 };
 
-const BreakdownPanels = ({ onShopClick, onScopeClick, activeScope, unitMode }: BreakdownPanelsProps) => {
+const BreakdownPanels = ({ onShopClick, onScopeClick, onDriverClick, activeScope, unitMode }: BreakdownPanelsProps) => {
   const u = absUnit(unitMode);
   const driverChartData = buildDriverChartData();
 
@@ -104,7 +105,7 @@ const BreakdownPanels = ({ onShopClick, onScopeClick, activeScope, unitMode }: B
         <h3 className="text-sm font-semibold text-foreground mb-1">Top Drivers</h3>
         <p className="text-xs text-muted-foreground mb-3">Top 10 by emissions impact · stacked by scope</p>
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={driverChartData} layout="vertical" barCategoryGap="18%">
+          <BarChart data={driverChartData} layout="vertical" barCategoryGap="18%" onClick={(e: any) => e?.activeLabel && onDriverClick?.(e.activeLabel)}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 18%)" horizontal={false} />
             <XAxis type="number" tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }} />
             <YAxis type="category" dataKey="driver" tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }} width={90} />

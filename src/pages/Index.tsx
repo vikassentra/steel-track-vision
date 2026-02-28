@@ -5,6 +5,7 @@ import TrendChart from "@/components/dashboard/TrendChart";
 import BreakdownPanels from "@/components/dashboard/BreakdownPanels";
 import DeviationDrawer from "@/components/dashboard/DeviationDrawer";
 import PeerBenchmark from "@/components/dashboard/PeerBenchmark";
+import DriverDetailModal from "@/components/dashboard/DriverDetailModal";
 import { plants } from "@/data/mockData";
 
 export type UnitMode = "emissions" | "energy";
@@ -17,6 +18,7 @@ const Index = () => {
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [unitMode, setUnitMode] = useState<UnitMode>("emissions");
   const [activeShop, setActiveShop] = useState("BF");
+  const [selectedDriver, setSelectedDriver] = useState<string | null>(null);
 
   const handlePointClick = (date: string) => {
     setSelectedDate(date);
@@ -96,6 +98,7 @@ const Index = () => {
         <BreakdownPanels
           onShopClick={handleShopClick}
           onScopeClick={handleScopeClick}
+          onDriverClick={(driver) => setSelectedDriver(driver)}
           activeScope={activeScope}
           unitMode={unitMode} />
 
@@ -119,6 +122,12 @@ const Index = () => {
         onClose={() => setDrawerOpen(false)}
         selectedDate={selectedDate}
         unitMode={unitMode} />
+
+      {/* Driver Detail Modal */}
+      <DriverDetailModal
+        driver={selectedDriver}
+        shop={activeShop}
+        onClose={() => setSelectedDriver(null)} />
 
     </div>);
 
