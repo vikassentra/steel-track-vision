@@ -60,6 +60,24 @@ const DriverDetailModal = ({ driver, shop, onClose }: DriverDetailModalProps) =>
           </div>
         </div>
 
+        {/* Metrics - all 3 in one row */}
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          {metrics.map((m) =>
+          <div key={m.label} className="bg-secondary rounded-lg p-2.5">
+              <p className="text-[10px] text-muted-foreground">{m.label}</p>
+              <p className="text-sm font-semibold text-foreground font-mono">{m.value}</p>
+              {"change" in m && m.change &&
+            <p className={`text-[10px] font-mono mt-0.5 ${m.change.startsWith("+") ? "text-chart-negative" : "text-chart-positive"}`}>
+                  {m.change} vs prev day
+                </p>
+            }
+              {m.label === "EF (kgCO2/unit)" &&
+            <p className="text-[9px] text-muted-foreground mt-1">Source: IPCC 2019</p>
+            }
+            </div>
+          )}
+        </div>
+
         {/* Trend */}
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
@@ -100,59 +118,27 @@ const DriverDetailModal = ({ driver, shop, onClose }: DriverDetailModalProps) =>
                   fontSize: 12
                 }}
                 formatter={(value: number) => [`${value}%`, "Share"]} />
-
               <Bar dataKey="share" fill="hsl(168 70% 50%)" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Metrics */}
-        <div className="grid grid-cols-2 gap-2 mb-4">
-          {metrics.slice(0, 2).map((m) =>
-          <div key={m.label} className="bg-secondary rounded-lg p-2.5">
-              <p className="text-[10px] text-muted-foreground">{m.label}</p>
-              <p className="text-sm font-semibold text-foreground font-mono">{m.value}</p>
-              {"change" in m && m.change &&
-            <p className={`text-[10px] font-mono mt-0.5 ${m.change.startsWith("+") ? "text-chart-negative" : "text-chart-positive"}`}>
-                  {m.change} vs prev day
-                </p>
-            }
-            </div>
-          )}
-        </div>
-
         {/* Historical Comparison */}
         <div className="bg-secondary rounded-lg p-3 mb-4">
           <div className="grid grid-cols-[auto_repeat(5,1fr)] gap-x-3 gap-y-1 items-center text-center">
-            {/* Header row */}
             <div />
             {historicalData.map((h) =>
             <p key={h.period} className="text-[9px] text-muted-foreground font-medium">{h.period}</p>
             )}
-            {/* Cons row */}
             <p className="text-[9px] text-muted-foreground text-left">Cons.</p>
             {historicalData.map((h) =>
             <p key={h.period + "-c"} className="text-[10px] font-semibold text-foreground font-mono">{h.cons}</p>
             )}
-            {/* Sp. Cons row */}
             <p className="text-[9px] text-muted-foreground text-left">Sp. Cons</p>
             {historicalData.map((h) =>
             <p key={h.period + "-s"} className="text-[10px] font-semibold text-foreground font-mono">{h.spCons}</p>
             )}
           </div>
-        </div>
-
-        {/* EF tile */}
-        <div className="grid grid-cols-2 gap-2 mb-4">
-          {metrics.slice(2).map((m) =>
-          <div key={m.label} className="bg-secondary rounded-lg p-2.5">
-              <p className="text-[10px] text-muted-foreground">{m.label}</p>
-              <p className="text-sm font-semibold text-foreground font-mono">{m.value}</p>
-              {m.label === "EF (kgCO2/unit)" &&
-            <p className="text-[9px] text-muted-foreground mt-1">Source: IPCC 2019</p>
-            }
-            </div>
-          )}
         </div>
 
         {/* Data Quality Flags */}
