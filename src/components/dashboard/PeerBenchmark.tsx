@@ -68,10 +68,28 @@ const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
         </div>
 
         <div className="space-y-3">
-          <div className="bg-secondary rounded-lg p-3">
+          <div className="bg-secondary rounded-lg p-3 space-y-1">
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Your Intensity</p>
-            <p className="text-xl font-bold text-primary font-mono">{yourValue?.intensity}</p>
-            <p className="text-xs text-muted-foreground">{u}</p>
+            <div className="flex justify-between text-xs">
+              <span className="text-muted-foreground">Today</span>
+              <span className="text-foreground font-mono">{yourValue?.intensity} {u}</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-muted-foreground">Previous Month</span>
+              <span className="text-foreground font-mono">2.78 {u}</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-muted-foreground">FY 26</span>
+              <span className="text-foreground font-mono">2.81 {u}</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-muted-foreground">FY 25</span>
+              <span className="text-foreground font-mono">2.92 {u}</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-muted-foreground">FY 24</span>
+              <span className="text-foreground font-mono">3.05 {u}</span>
+            </div>
           </div>
           <div className="bg-secondary rounded-lg p-3 space-y-1">
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Benchmarks</p>
