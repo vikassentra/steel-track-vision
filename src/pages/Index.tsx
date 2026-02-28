@@ -90,7 +90,7 @@ const Index = () => {
         {/* Page Title */}
         <div>
           
-          <p className="text-xs text-muted-foreground">Carbon footprint monitoring · Steel Co. · {activePlant}</p>
+          
         </div>
 
         {/* KPI Cards */}
