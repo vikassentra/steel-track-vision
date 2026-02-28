@@ -104,7 +104,23 @@ const RunAnalyticsModal = ({ open, onClose }: RunAnalyticsModalProps) => {
   const [trendPeriods, setTrendPeriods] = useState<string[]>(["FY24 Q1", "FY24 Q2", "FY24 Q3", "FY24 Q4", "FY25 Q1", "FY25 Q2"]);
   const [trendLocations, setTrendLocations] = useState<string[]>(["Rourkela Works", "Burnpur Works", "Durgapur Steel"]);
   const [trendDriver, setTrendDriver] = useState<string>("Intensity");
-  const [periodMenuOpen, setPeriodMenuOpen] = useState(false);
+  // Driver comparison tab state
+  const allDrivers = ["Coke Rate", "PCI Rate", "Scrap Ratio", "Power Mix", "BFG Recovery", "Sinter Ratio", "Slag Rate", "Pellet Ratio", "COG Recovery", "Limestone"];
+  const [driverTabDrivers, setDriverTabDrivers] = useState<string[]>(["Coke Rate", "PCI Rate", "Scrap Ratio", "Power Mix", "BFG Recovery", "Sinter Ratio"]);
+  const [driverTabLocations, setDriverTabLocations] = useState<string[]>(["Rourkela Works", "Burnpur Works", "Durgapur Steel"]);
+  const [driverAddMenuOpen, setDriverAddMenuOpen] = useState(false);
+  const driverAvailableToAdd = allDrivers.filter((d) => !driverTabDrivers.includes(d));
+  const filteredDriverData = driverTabDrivers.map((d) => ({
+    driver: d,
+    Rourkela: Math.round(300 + Math.abs(d.charCodeAt(0) * 7 % 200)),
+    Burnpur: Math.round(280 + Math.abs(d.charCodeAt(1) * 5 % 180)),
+    Durgapur: Math.round(320 + Math.abs(d.charCodeAt(2) * 6 % 220)),
+  }));
+  const locationColors: Record<string, string> = {
+    "Rourkela Works": "hsl(168 70% 50%)",
+    "Burnpur Works": "hsl(45 95% 58%)",
+    "Durgapur Steel": "hsl(270 60% 60%)",
+  };
 
   const toggleLocation = (loc: string) => {
     setSelectedLocations((prev) =>
@@ -376,18 +392,84 @@ const RunAnalyticsModal = ({ open, onClose }: RunAnalyticsModalProps) => {
         {/* Driver Comparison Tab */}
         {activeTab === "drivers" && (
           <div className="space-y-4">
+            {/* Filters */}
+            <div className="flex flex-wrap gap-3 items-start">
+              {/* Site selector */}
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Sites</p>
+                <div className="flex gap-1 flex-wrap">
+                  {locations.map((loc) => (
+                    <Badge
+                      key={loc}
+                      variant={driverTabLocations.includes(loc) ? "default" : "secondary"}
+                      className="cursor-pointer text-[10px]"
+                      onClick={() =>
+                        setDriverTabLocations((prev) =>
+                          prev.includes(loc) ? prev.filter((l) => l !== loc) : [...prev, loc]
+                        )
+                      }
+                    >
+                      {loc}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Driver selector with add/remove */}
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Drivers</p>
+                <div className="flex items-center gap-1 flex-wrap">
+                  {driverTabDrivers.map((d) => (
+                    <Badge key={d} variant="outline" className="text-[10px] flex items-center gap-1 pr-1">
+                      {d}
+                      <button
+                        onClick={() => setDriverTabDrivers((prev) => prev.filter((x) => x !== d))}
+                        className="ml-0.5 rounded-full hover:bg-destructive/20 p-0.5 transition-colors"
+                      >
+                        <X className="w-2.5 h-2.5 text-muted-foreground hover:text-destructive" />
+                      </button>
+                    </Badge>
+                  ))}
+                  {driverAvailableToAdd.length > 0 && (
+                    <Popover open={driverAddMenuOpen} onOpenChange={setDriverAddMenuOpen}>
+                      <PopoverTrigger asChild>
+                        <button className="flex items-center gap-1 px-2 py-1 text-[10px] text-primary border border-dashed border-primary/40 rounded-md hover:bg-primary/10 transition-colors">
+                          <Plus className="w-3 h-3" />
+                          Add
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-44 p-1" align="start">
+                        <div className="max-h-48 overflow-y-auto">
+                          {driverAvailableToAdd.map((d) => (
+                            <button
+                              key={d}
+                              onClick={() => { setDriverTabDrivers((prev) => [...prev, d]); setDriverAddMenuOpen(false); }}
+                              className="w-full text-left px-2.5 py-1.5 text-xs hover:bg-secondary rounded transition-colors"
+                            >
+                              {d}
+                            </button>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Chart */}
             <div className="bg-secondary/30 rounded-lg p-4">
               <p className="text-xs font-medium mb-3">Driver Impact by Location (tCO₂e contribution)</p>
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={driverComparisonData} layout="vertical" barGap={2}>
+              <ResponsiveContainer width="100%" height={filteredDriverData.length * 50 + 40}>
+                <BarChart data={filteredDriverData} layout="vertical" barGap={2}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis type="number" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
                   <YAxis dataKey="driver" type="category" width={90} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
                   <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11 }} />
                   <Legend wrapperStyle={{ fontSize: 10 }} />
-                  <Bar dataKey="Rourkela" fill="hsl(168 70% 50%)" radius={[0, 3, 3, 0]} barSize={14} />
-                  <Bar dataKey="Burnpur" fill="hsl(45 95% 58%)" radius={[0, 3, 3, 0]} barSize={14} />
-                  <Bar dataKey="Durgapur" fill="hsl(270 60% 60%)" radius={[0, 3, 3, 0]} barSize={14} />
+                  {driverTabLocations.includes("Rourkela Works") && <Bar dataKey="Rourkela" fill="hsl(168 70% 50%)" radius={[0, 3, 3, 0]} barSize={14} />}
+                  {driverTabLocations.includes("Burnpur Works") && <Bar dataKey="Burnpur" fill="hsl(45 95% 58%)" radius={[0, 3, 3, 0]} barSize={14} />}
+                  {driverTabLocations.includes("Durgapur Steel") && <Bar dataKey="Durgapur" fill="hsl(270 60% 60%)" radius={[0, 3, 3, 0]} barSize={14} />}
                 </BarChart>
               </ResponsiveContainer>
             </div>
