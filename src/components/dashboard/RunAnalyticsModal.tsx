@@ -63,11 +63,48 @@ const driverComparisonData = drivers.map((d) => ({
 
 type Tab = "location" | "time" | "drivers";
 
+const allTimePeriods = ["FY23 Q1", "FY23 Q2", "FY23 Q3", "FY23 Q4", "FY24 Q1", "FY24 Q2", "FY24 Q3", "FY24 Q4", "FY25 Q1", "FY25 Q2"];
+
+const generateTrendData = (periods: string[], locs: string[], driver: string) => {
+  const baseValues: Record<string, Record<string, number>> = {
+    "Intensity": { Rourkela: 2.95, Burnpur: 2.72, Durgapur: 3.0 },
+    "Coke Rate": { Rourkela: 395, Burnpur: 380, Durgapur: 405 },
+    "PCI Rate": { Rourkela: 135, Burnpur: 150, Durgapur: 122 },
+    "Scrap Ratio": { Rourkela: 16, Burnpur: 20, Durgapur: 13 },
+    "BFG Recovery": { Rourkela: 85, Burnpur: 89, Durgapur: 82 },
+    "Sinter Ratio": { Rourkela: 75, Burnpur: 79, Durgapur: 71 },
+  };
+  const base = baseValues[driver] || baseValues["Intensity"];
+  return periods.map((tp, i) => {
+    const row: Record<string, any> = { period: tp };
+    locs.forEach((loc) => {
+      const key = loc.split(" ")[0];
+      const b = base[key] || 2.8;
+      row[key] = +(b - i * (b * 0.01) + Math.random() * (b * 0.03)).toFixed(2);
+    });
+    return row;
+  });
+};
+
+const driverUnits: Record<string, string> = {
+  "Intensity": "tCO₂e/t crude steel",
+  "Coke Rate": "kg/tHM",
+  "PCI Rate": "kg/tHM",
+  "Scrap Ratio": "%",
+  "BFG Recovery": "%",
+  "Sinter Ratio": "%",
+};
+
 const RunAnalyticsModal = ({ open, onClose }: RunAnalyticsModalProps) => {
   const [activeTab, setActiveTab] = useState<Tab>("location");
   const [selectedLocations, setSelectedLocations] = useState<string[]>(["Rourkela Works", "Burnpur Works"]);
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>(defaultMetrics);
   const [addMenuOpen, setAddMenuOpen] = useState(false);
+  // Time period tab state
+  const [trendPeriods, setTrendPeriods] = useState<string[]>(["FY24 Q1", "FY24 Q2", "FY24 Q3", "FY24 Q4", "FY25 Q1", "FY25 Q2"]);
+  const [trendLocations, setTrendLocations] = useState<string[]>(["Rourkela Works", "Burnpur Works", "Durgapur Steel"]);
+  const [trendDriver, setTrendDriver] = useState<string>("Intensity");
+  const [periodMenuOpen, setPeriodMenuOpen] = useState(false);
 
   const toggleLocation = (loc: string) => {
     setSelectedLocations((prev) =>
@@ -240,18 +277,81 @@ const RunAnalyticsModal = ({ open, onClose }: RunAnalyticsModalProps) => {
         {/* Time Period Tab */}
         {activeTab === "time" && (
           <div className="space-y-4">
+            {/* Filters row */}
+            <div className="flex flex-wrap gap-3 items-start">
+              {/* Time Period selector */}
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Time Periods</p>
+                <div className="flex gap-1 flex-wrap">
+                  {allTimePeriods.map((tp) => (
+                    <Badge
+                      key={tp}
+                      variant={trendPeriods.includes(tp) ? "default" : "secondary"}
+                      className="cursor-pointer text-[10px]"
+                      onClick={() =>
+                        setTrendPeriods((prev) =>
+                          prev.includes(tp) ? prev.filter((p) => p !== tp) : [...prev, tp]
+                        )
+                      }
+                    >
+                      {tp}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Location selector */}
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Locations</p>
+                <div className="flex gap-1 flex-wrap">
+                  {locations.map((loc) => (
+                    <Badge
+                      key={loc}
+                      variant={trendLocations.includes(loc) ? "default" : "secondary"}
+                      className="cursor-pointer text-[10px]"
+                      onClick={() =>
+                        setTrendLocations((prev) =>
+                          prev.includes(loc) ? prev.filter((l) => l !== loc) : [...prev, loc]
+                        )
+                      }
+                    >
+                      {loc}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Driver selector (single) */}
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Driver</p>
+                <div className="flex gap-1 flex-wrap">
+                  {drivers.map((d) => (
+                    <Badge
+                      key={d}
+                      variant={trendDriver === d ? "default" : "secondary"}
+                      className="cursor-pointer text-[10px]"
+                      onClick={() => setTrendDriver(d)}
+                    >
+                      {d}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Chart */}
             <div className="bg-secondary/30 rounded-lg p-4">
-              <p className="text-xs font-medium mb-3">Intensity Trend by Location (tCO₂e/t crude steel)</p>
+              <p className="text-xs font-medium mb-3">{trendDriver} Trend by Location ({driverUnits[trendDriver] || ""})</p>
               <ResponsiveContainer width="100%" height={280}>
-                <LineChart data={trendComparisonData}>
+                <LineChart data={generateTrendData(trendPeriods.sort(), trendLocations, trendDriver)}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="period" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
                   <YAxis domain={["auto", "auto"]} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
                   <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11 }} />
                   <Legend wrapperStyle={{ fontSize: 10 }} />
-                  <Line type="monotone" dataKey="Rourkela" stroke="hsl(168 70% 50%)" strokeWidth={2} dot={{ r: 3 }} />
-                  <Line type="monotone" dataKey="Burnpur" stroke="hsl(45 95% 58%)" strokeWidth={2} dot={{ r: 3 }} />
-                  <Line type="monotone" dataKey="Durgapur" stroke="hsl(270 60% 60%)" strokeWidth={2} dot={{ r: 3 }} />
+                  {trendLocations.includes("Rourkela Works") && <Line type="monotone" dataKey="Rourkela" stroke="hsl(168 70% 50%)" strokeWidth={2} dot={{ r: 3 }} />}
+                  {trendLocations.includes("Burnpur Works") && <Line type="monotone" dataKey="Burnpur" stroke="hsl(45 95% 58%)" strokeWidth={2} dot={{ r: 3 }} />}
+                  {trendLocations.includes("Durgapur Steel") && <Line type="monotone" dataKey="Durgapur" stroke="hsl(270 60% 60%)" strokeWidth={2} dot={{ r: 3 }} />}
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -262,7 +362,7 @@ const RunAnalyticsModal = ({ open, onClose }: RunAnalyticsModalProps) => {
                 { loc: "Rourkela", change: -4.2, best: "FY25 Q1" },
                 { loc: "Burnpur", change: -6.8, best: "FY25 Q2" },
                 { loc: "Durgapur", change: -1.5, best: "FY24 Q4" },
-              ].map((s) => (
+              ].filter((s) => trendLocations.some((l) => l.startsWith(s.loc))).map((s) => (
                 <div key={s.loc} className="bg-secondary/30 rounded-lg p-3">
                   <p className="text-xs font-medium">{s.loc}</p>
                   <p className={`text-sm font-bold mt-1 ${s.change < -3 ? "text-emerald-400" : "text-amber-400"}`}>{s.change}%</p>
