@@ -1,7 +1,6 @@
-import { shopBreakdowns, scopeCategories, driverDetails } from "@/data/mockData";
+import { shopBreakdowns, driverDetails } from "@/data/mockData";
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  Cell
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from "recharts";
 import type { UnitMode } from "@/pages/Index";
 
@@ -13,12 +12,6 @@ interface BreakdownPanelsProps {
 }
 
 const absUnit = (mode: UnitMode) => mode === "energy" ? "TJ/t" : "tCO2e/t";
-
-const SCOPE_COLORS = {
-  "Scope 1": "hsl(168 70% 50%)",
-  "Scope 2": "hsl(45 95% 58%)",
-  "Scope 3": "hsl(270 60% 60%)",
-};
 
 const ShopTooltip = ({ active, payload, unitMode }: any) => {
   if (!active || !payload?.length) return null;
@@ -35,26 +28,65 @@ const ShopTooltip = ({ active, payload, unitMode }: any) => {
   );
 };
 
+// Build driver data with scope breakdown for stacked bar
+const buildDriverChartData = () => {
+  // Group by driver, aggregate scope contributions
+  const driverMap = new Map<string, { driver: string; scope1: number; scope2: number; scope3: number; total: number }>();
+
+  driverDetails.forEach((d) => {
+    const abs = Math.abs(d.emissionsChange);
+    if (!driverMap.has(d.driver)) {
+      driverMap.set(d.driver, { driver: d.driver, scope1: 0, scope2: 0, scope3: 0, total: 0 });
+    }
+    const entry = driverMap.get(d.driver)!;
+    if (d.scope === "Scope 1") entry.scope1 += abs;
+    else if (d.scope === "Scope 2") entry.scope2 += abs;
+    else if (d.scope === "Scope 3") entry.scope3 += abs;
+    else {
+      // "—" or other, split evenly across scopes
+      entry.scope1 += abs * 0.6;
+      entry.scope2 += abs * 0.2;
+      entry.scope3 += abs * 0.2;
+    }
+    entry.total += abs;
+  });
+
+  return Array.from(driverMap.values())
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 10)
+    .map((d) => ({
+      ...d,
+      scope1: Math.round(d.scope1),
+      scope2: Math.round(d.scope2),
+      scope3: Math.round(d.scope3),
+    }));
+};
+
+const DriverTooltip = ({ active, payload }: any) => {
+  if (!active || !payload?.length) return null;
+  const d = payload[0]?.payload;
+  return (
+    <div className="bg-popover border border-border rounded-lg p-2 shadow-xl text-xs">
+      <p className="font-semibold text-foreground mb-1">{d.driver}</p>
+      <p><span style={{ color: "hsl(168 70% 50%)" }}>Scope 1:</span> {d.scope1.toLocaleString()} tCO₂e</p>
+      <p><span style={{ color: "hsl(45 95% 58%)" }}>Scope 2:</span> {d.scope2.toLocaleString()} tCO₂e</p>
+      <p><span style={{ color: "hsl(270 60% 60%)" }}>Scope 3:</span> {d.scope3.toLocaleString()} tCO₂e</p>
+      <p className="font-medium mt-1">Total: {(d.scope1 + d.scope2 + d.scope3).toLocaleString()} tCO₂e</p>
+    </div>
+  );
+};
+
 const BreakdownPanels = ({ onShopClick, onScopeClick, activeScope, unitMode }: BreakdownPanelsProps) => {
   const u = absUnit(unitMode);
-
-  const scopeTotals = [
-    { name: "Scope 1", value: 10910, color: SCOPE_COLORS["Scope 1"] },
-    { name: "Scope 2", value: 1970, color: SCOPE_COLORS["Scope 2"] },
-    { name: "Scope 3", value: 1500, color: SCOPE_COLORS["Scope 3"] },
-  ];
-
-  const filteredCategories = activeScope === "All"
-    ? scopeCategories
-    : scopeCategories.filter((c) => c.scope === activeScope);
+  const driverChartData = buildDriverChartData();
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       {/* By Steel Shops */}
       <div className="bg-card rounded-lg border border-border p-5">
         <h3 className="text-sm font-semibold text-foreground mb-1">Emissions by Shop</h3>
         <p className="text-xs text-muted-foreground mb-3">{u} — click to filter</p>
-        <ResponsiveContainer width="100%" height={240}>
+        <ResponsiveContainer width="100%" height={300}>
           <BarChart data={shopBreakdowns} onClick={(e: any) => e?.activeLabel && onShopClick(e.activeLabel)}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 18%)" />
             <XAxis dataKey="shop" tick={{ fontSize: 9, fill: "hsl(215 15% 55%)" }} angle={-20} textAnchor="end" height={50} />
@@ -67,56 +99,28 @@ const BreakdownPanels = ({ onShopClick, onScopeClick, activeScope, unitMode }: B
         </ResponsiveContainer>
       </div>
 
-      {/* By Scope (Horizontal Bar) */}
-      <div className="bg-card rounded-lg border border-border p-5">
-        <h3 className="text-sm font-semibold text-foreground mb-1">Emissions by Scope</h3>
-        <p className="text-xs text-muted-foreground mb-3">{u} — click to filter categories</p>
-        <ResponsiveContainer width="100%" height={240}>
-          <BarChart data={scopeTotals} layout="vertical" onClick={(e: any) => e?.activeLabel && onScopeClick(e.activeLabel)}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 18%)" horizontal={false} />
-            <XAxis type="number" tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }} />
-            <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }} width={60} />
-            <Tooltip
-              formatter={(value: number) => [`${value.toLocaleString()} ${u}`]}
-              contentStyle={{
-                background: "hsl(220 18% 15%)",
-                border: "1px solid hsl(220 15% 22%)",
-                borderRadius: 8,
-                fontSize: 12,
-              }}
-            />
-            <Bar dataKey="value" radius={[0, 4, 4, 0]} className="cursor-pointer">
-              {scopeTotals.map((entry) => (
-                <Cell key={entry.name} fill={entry.color} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Top 5 Drivers */}
+      {/* Top 10 Drivers - Stacked Bar by Scope */}
       <div className="bg-card rounded-lg border border-border p-5">
         <h3 className="text-sm font-semibold text-foreground mb-1">Top Drivers</h3>
-        <p className="text-xs text-muted-foreground mb-3">Top 5 by emissions impact</p>
-        <div className="space-y-2.5">
-          {driverDetails
-            .sort((a, b) => Math.abs(b.emissionsChange) - Math.abs(a.emissionsChange))
-            .slice(0, 5)
-            .map((d) => (
-              <div key={d.driver} className="group cursor-pointer">
-                <div className="flex items-center justify-between text-xs mb-1">
-                  <span className="text-foreground group-hover:text-primary transition-colors">{d.driver}</span>
-                  <span className={`font-mono font-medium ${d.emissionsChange > 0 ? "text-chart-negative" : "text-chart-positive"}`}>
-                    {d.emissionsChange > 0 ? "+" : ""}{d.emissionsChange} tCO₂e
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                  <span>{d.shop} · {d.scope}</span>
-                  <span className="font-mono">{d.valueChange}</span>
-                </div>
-              </div>
-            ))}
-        </div>
+        <p className="text-xs text-muted-foreground mb-3">Top 10 by emissions impact · stacked by scope</p>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={driverChartData} layout="vertical" barCategoryGap="18%">
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 18%)" horizontal={false} />
+            <XAxis type="number" tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }} />
+            <YAxis type="category" dataKey="driver" tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }} width={90} />
+            <Tooltip content={<DriverTooltip />} />
+            <Legend
+              wrapperStyle={{ fontSize: 10 }}
+              formatter={(value: string) => {
+                const labels: Record<string, string> = { scope1: "Scope 1", scope2: "Scope 2", scope3: "Scope 3" };
+                return labels[value] || value;
+              }}
+            />
+            <Bar dataKey="scope1" stackId="a" fill="hsl(168 70% 50%)" name="scope1" />
+            <Bar dataKey="scope2" stackId="a" fill="hsl(45 95% 58%)" name="scope2" />
+            <Bar dataKey="scope3" stackId="a" fill="hsl(270 60% 60%)" name="scope3" radius={[0, 4, 4, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );
