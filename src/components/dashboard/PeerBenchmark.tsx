@@ -163,6 +163,16 @@ const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
                   fill: "hsl(330 80% 60%)",
                   position: "top"
                 }} />
+              <ReferenceLine
+                x={2.1}
+                stroke="hsl(168 70% 50%)"
+                strokeDasharray="4 4"
+                label={{
+                  value: "FY28 Target 2.10",
+                  fontSize: 9,
+                  fill: "hsl(168 70% 50%)",
+                  position: "top"
+                }} />
 
               <Bar dataKey="intensity" radius={[0, 6, 6, 0]} barSize={20}>
                 <LabelList
