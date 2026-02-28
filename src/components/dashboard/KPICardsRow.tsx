@@ -101,7 +101,8 @@ const KPICardsRow = ({ onKPIClick, unitMode, onMetricClick, onSeeAllMetrics }: K
   const paramCards: (KPICardProps & {scopeBreakdown?: {label: string;value: string;unit: string;}[];})[] = [
   { title: "Coke Rate", value: "385", unit: "kg/t", delta: 2.4, deltaLabel: "vs prev day" },
   { title: "Renewable Elec.", value: "18.5", unit: "%", delta: -3.1, deltaLabel: "vs prev day" },
-  { title: "Scrap Rate", value: "12.3", unit: "%", delta: -1.5, deltaLabel: "vs prev day" }];
+  { title: "Scrap Rate", value: "12.3", unit: "%", delta: -1.5, deltaLabel: "vs prev day" },
+  { title: "BFG Recovery", value: "92.4", unit: "%", delta: -0.8, deltaLabel: "vs prev day" }];
 
 
   const handleParamClick = (card: typeof paramCards[0]) => {
@@ -129,7 +130,7 @@ const KPICardsRow = ({ onKPIClick, unitMode, onMetricClick, onSeeAllMetrics }: K
         }
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-4 gap-3">
         {paramCards.map((card) =>
         <KPICard key={card.title} {...card} onClick={() => handleParamClick(card)} />
         )}
