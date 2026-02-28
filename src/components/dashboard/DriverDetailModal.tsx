@@ -95,16 +95,24 @@ const DriverDetailModal = ({ driver, shop, onClose }: DriverDetailModalProps) =>
         </div>
 
         {/* Historical Comparison */}
-        <div className="grid grid-cols-5 gap-1.5 mb-4">
-          {historicalData.map((h) => (
-            <div key={h.period} className="bg-secondary rounded-lg p-2 text-center">
-              <p className="text-[9px] text-muted-foreground font-medium mb-1">{h.period}</p>
-              <p className="text-[9px] text-muted-foreground">Cons.</p>
-              <p className="text-[10px] font-semibold text-foreground font-mono">{h.cons}</p>
-              <p className="text-[9px] text-muted-foreground mt-1">Sp. Cons</p>
-              <p className="text-[10px] font-semibold text-foreground font-mono">{h.spCons}</p>
-            </div>
-          ))}
+        <div className="bg-secondary rounded-lg p-3 mb-4">
+          <div className="grid grid-cols-[auto_repeat(5,1fr)] gap-x-3 gap-y-1 items-center text-center">
+            {/* Header row */}
+            <div />
+            {historicalData.map((h) => (
+              <p key={h.period} className="text-[9px] text-muted-foreground font-medium">{h.period}</p>
+            ))}
+            {/* Cons row */}
+            <p className="text-[9px] text-muted-foreground text-left">Cons.</p>
+            {historicalData.map((h) => (
+              <p key={h.period + "-c"} className="text-[10px] font-semibold text-foreground font-mono">{h.cons}</p>
+            ))}
+            {/* Sp. Cons row */}
+            <p className="text-[9px] text-muted-foreground text-left">Sp. Cons</p>
+            {historicalData.map((h) => (
+              <p key={h.period + "-s"} className="text-[10px] font-semibold text-foreground font-mono">{h.spCons}</p>
+            ))}
+          </div>
         </div>
 
         {/* EF tile */}
