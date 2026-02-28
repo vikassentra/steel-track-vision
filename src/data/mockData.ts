@@ -51,6 +51,7 @@ export const waterfallData: WaterfallItem[] = [
 ];
 
 export const driverDetails: DriverRow[] = [
+  { driver: "Production", scope: "—", shop: "All", valueChange: "+120 t steel", emissionsChange: 420 },
   { driver: "Coke", scope: "Scope 1", shop: "Coke Oven", valueChange: "+12 t", emissionsChange: 185, anomaly: "High consumption" },
   { driver: "Electricity (Grid)", scope: "Scope 2", shop: "Rolling Mill", valueChange: "+8,200 kWh", emissionsChange: 142 },
   { driver: "Coal (PCI)", scope: "Scope 1", shop: "Blast Furnace", valueChange: "+6 t", emissionsChange: 125, anomaly: "Supplier change" },
