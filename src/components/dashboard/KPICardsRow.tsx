@@ -75,6 +75,7 @@ const KPICard = ({ title, value, unit, delta, deltaLabel, scopeColor, onClick, s
 interface KPICardsRowProps {
   onKPIClick: () => void;
   unitMode: UnitMode;
+  frequency: "Monthly" | "Daily";
   onMetricClick?: (metric: {title: string;value: string;unit: string;delta: number;}) => void;
   onSeeAllMetrics?: () => void;
 }
@@ -82,8 +83,9 @@ interface KPICardsRowProps {
 const absUnit = (mode: UnitMode) => mode === "energy" ? "TJ" : "tCO2e";
 const intUnit = (mode: UnitMode) => mode === "energy" ? "TJ/t" : "tCO2e/t";
 
-const KPICardsRow = ({ onKPIClick, unitMode, onMetricClick, onSeeAllMetrics }: KPICardsRowProps) => {
+const KPICardsRow = ({ onKPIClick, unitMode, frequency, onMetricClick, onSeeAllMetrics }: KPICardsRowProps) => {
   const iU = intUnit(unitMode);
+  const dl = frequency === "Daily" ? "vs prev day" : "vs prev month";
 
   const intensityScopeBreakdown = [
   { label: "S1", value: "1.77", unit: iU },
@@ -93,16 +95,16 @@ const KPICardsRow = ({ onKPIClick, unitMode, onMetricClick, onSeeAllMetrics }: K
 
 
   const mainCards: (KPICardProps & {scopeBreakdown?: {label: string;value: string;unit: string;}[];})[] = [
-  { title: "Total Emissions", value: "13,650", unit: absUnit(unitMode), delta: 3.4, deltaLabel: "vs prev day" },
-  { title: "Production", value: "4,789", unit: "tonnes", delta: 2.1, deltaLabel: "vs prev day" },
-  { title: "Intensity", value: "2.85", unit: iU, delta: 1.8, deltaLabel: "vs prev day", scopeBreakdown: intensityScopeBreakdown }];
+  { title: "Total Emissions", value: "13,650", unit: absUnit(unitMode), delta: 3.4, deltaLabel: dl },
+  { title: "Production", value: "4,789", unit: "tonnes", delta: 2.1, deltaLabel: dl },
+  { title: "Intensity", value: "2.85", unit: iU, delta: 1.8, deltaLabel: dl, scopeBreakdown: intensityScopeBreakdown }];
 
 
   const paramCards: (KPICardProps & {scopeBreakdown?: {label: string;value: string;unit: string;}[];})[] = [
-  { title: "Coke Rate", value: "385", unit: "kg/t", delta: 2.4, deltaLabel: "vs prev day" },
-  { title: "Renewable Elec.", value: "18.5", unit: "%", delta: -3.1, deltaLabel: "vs prev day" },
-  { title: "Scrap Rate", value: "12.3", unit: "%", delta: -1.5, deltaLabel: "vs prev day" },
-  { title: "BFG Recovery", value: "92.4", unit: "%", delta: -0.8, deltaLabel: "vs prev day" }];
+  { title: "Coke Rate", value: "385", unit: "kg/t", delta: 2.4, deltaLabel: dl },
+  { title: "Renewable Elec.", value: "18.5", unit: "%", delta: -3.1, deltaLabel: dl },
+  { title: "Scrap Rate", value: "12.3", unit: "%", delta: -1.5, deltaLabel: dl },
+  { title: "BFG Recovery", value: "92.4", unit: "%", delta: -0.8, deltaLabel: dl }];
 
 
   const handleParamClick = (card: typeof paramCards[0]) => {

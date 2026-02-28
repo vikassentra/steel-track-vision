@@ -7,6 +7,7 @@ import type { UnitMode } from "@/pages/Index";
 interface TrendChartProps {
   onPointClick: (date: string) => void;
   unitMode: UnitMode;
+  frequency: "Monthly" | "Daily";
 }
 
 const absUnit = (mode: UnitMode) => mode === "energy" ? "TJ" : "tCO2e";
@@ -30,18 +31,19 @@ const CustomTooltip = ({ active, payload, label, unitMode }: any) => {
   );
 };
 
-const TrendChart = ({ onPointClick, unitMode }: TrendChartProps) => {
+const TrendChart = ({ onPointClick, unitMode, frequency }: TrendChartProps) => {
   const data = dailyEmissions.map((d) => ({
     ...d,
     date: d.date.slice(5),
   }));
+  const periodLabel = frequency === "Daily" ? "day" : "month";
 
   return (
     <div className="bg-card border-y border-border px-4 py-5">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-sm font-semibold text-foreground">Emissions Trend</h3>
-          <p className="text-xs text-muted-foreground">{absUnit(unitMode)} by day — click a point to explore deviations</p>
+          <p className="text-xs text-muted-foreground">{absUnit(unitMode)} by {periodLabel} — click a point to explore deviations</p>
         </div>
         <div className="flex items-center gap-3 text-xs">
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-scope1" />Scope 1</span>
