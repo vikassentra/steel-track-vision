@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { X, AlertCircle, CheckCircle } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
@@ -16,6 +17,8 @@ Array.from({ length: 30 }, (_, i) => {
 });
 
 const DriverDetailModal = ({ driver, shop, onClose }: DriverDetailModalProps) => {
+  const [trendMode, setTrendMode] = useState<"cons" | "spCons">("cons");
+
   if (!driver) return null;
 
   const trend = generateMassShare();
@@ -59,7 +62,31 @@ const DriverDetailModal = ({ driver, shop, onClose }: DriverDetailModalProps) =>
 
         {/* Trend */}
         <div className="mb-4">
-          <p className="text-xs text-muted-foreground mb-2">Last 30 days trend</p>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs text-muted-foreground">Last 30 days trend</p>
+            <div className="flex items-center bg-secondary rounded-md p-0.5">
+              <button
+                onClick={() => setTrendMode("cons")}
+                className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors ${
+                  trendMode === "cons"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Cons./Prod.
+              </button>
+              <button
+                onClick={() => setTrendMode("spCons")}
+                className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors ${
+                  trendMode === "spCons"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Sp. Cons
+              </button>
+            </div>
+          </div>
           <ResponsiveContainer width="100%" height={160}>
             <BarChart data={trend}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 18%)" vertical={false} />
