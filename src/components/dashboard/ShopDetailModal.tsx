@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { X, AlertTriangle, Sparkles, TrendingDown, CheckCircle, ChevronDown, ChevronUp } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { Badge } from "@/components/ui/badge";
 import { driverDetails } from "@/data/mockData";
 import DriverDetailModal from "./DriverDetailModal";
@@ -126,65 +126,53 @@ const ShopDetailModal = ({ shop, onClose }: ShopDetailModalProps) => {
             </div>
           </div>
 
-          {/* Individual driver cards with bar + details */}
-          <div className="space-y-2 mb-6">
-            {drivers.map((row) => {
-              const abs = Math.abs(row.emissionsChange);
-              const isS1 = row.scope === "Scope 1";
-              const isS2 = row.scope === "Scope 2";
-              const isS3 = row.scope === "Scope 3";
-              const s1 = isS1 ? abs : row.scope === "—" ? abs * 0.6 : 0;
-              const s2 = isS2 ? abs : row.scope === "—" ? abs * 0.2 : 0;
-              const s3 = isS3 ? abs : row.scope === "—" ? abs * 0.2 : 0;
-              const barData = [
-                { name: "S1", value: Math.round(s1), fill: "hsl(168 70% 50%)" },
-                { name: "S2", value: Math.round(s2), fill: "hsl(45 95% 58%)" },
-                { name: "S3", value: Math.round(s3), fill: "hsl(270 60% 60%)" },
-              ].filter((b) => b.value > 0);
-              return (
-                <div
-                  key={row.driver}
-                  onClick={() => setSelectedDriver(row.driver)}
-                  className="border border-border rounded-lg p-3 hover:border-primary/30 cursor-pointer transition-colors"
+          {/* Single bar chart with all drivers + details columns */}
+          <div className="flex gap-4 mb-6">
+            {/* Left: stacked bar chart */}
+            <div className="flex-1 min-w-0">
+              <ResponsiveContainer width="100%" height={drivers.length * 32 + 40}>
+                <BarChart
+                  data={chartData}
+                  layout="vertical"
+                  barCategoryGap="16%"
+                  onClick={(e: any) => e?.activeLabel && setSelectedDriver(e.activeLabel)}
                 >
-                  <div className="flex items-start gap-4">
-                    {/* Left: chart */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5 mb-1">
-                        {row.anomaly && <AlertTriangle className="w-3 h-3 text-accent" />}
-                        <p className="text-xs font-semibold">{row.driver}</p>
-                      </div>
-                      <ResponsiveContainer width="100%" height={barData.length * 24 + 12}>
-                        <BarChart data={barData} layout="vertical" barGap={2}>
-                          <XAxis type="number" hide />
-                          <YAxis dataKey="name" type="category" width={24} tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} />
-                          <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11 }} />
-                          <Bar dataKey="value" radius={[0, 3, 3, 0]} barSize={12}>
-                            {barData.map((entry, idx) => (
-                              <Cell key={idx} fill={entry.fill} />
-                            ))}
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                    {/* Right: details */}
-                    <div className="shrink-0 w-48 space-y-1.5 pt-1">
-                      <Badge variant="secondary" className="text-[9px]">{row.scope}</Badge>
-                      <div>
-                        <p className="text-[10px] text-muted-foreground">Δ Activity</p>
-                        <p className="text-xs font-medium">{row.valueChange}</p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] text-muted-foreground">Δ tCO₂e</p>
-                        <p className={`text-xs font-bold ${row.emissionsChange > 0 ? "text-red-400" : "text-emerald-400"}`}>
-                          {row.emissionsChange > 0 ? "+" : ""}{row.emissionsChange} tCO₂e
-                        </p>
-                      </div>
-                    </div>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
+                  <XAxis type="number" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                  <YAxis type="category" dataKey="driver" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} width={100} />
+                  <Tooltip content={<DriverTooltip />} />
+                  <Legend wrapperStyle={{ fontSize: 10 }} formatter={(value: string) => {
+                    const labels: Record<string, string> = { scope1: "Scope 1", scope2: "Scope 2", scope3: "Scope 3" };
+                    return labels[value] || value;
+                  }} />
+                  <Bar dataKey="scope1" stackId="a" fill="hsl(168 70% 50%)" name="scope1" />
+                  <Bar dataKey="scope2" stackId="a" fill="hsl(45 95% 58%)" name="scope2" />
+                  <Bar dataKey="scope3" stackId="a" fill="hsl(270 60% 60%)" name="scope3" radius={[0, 4, 4, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            {/* Right: Δ Activity and Δ tCO₂e columns */}
+            <div className="shrink-0 w-52">
+              <div className="grid grid-cols-2 gap-x-3 mb-2 pt-1">
+                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider text-right">Δ Activity</p>
+                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider text-right">Δ tCO₂e</p>
+              </div>
+              <div className="space-y-0">
+                {drivers.map((row) => (
+                  <div
+                    key={row.driver}
+                    onClick={() => setSelectedDriver(row.driver)}
+                    className="grid grid-cols-2 gap-x-3 cursor-pointer hover:bg-secondary/30 rounded px-1 transition-colors"
+                    style={{ height: "32px", display: "flex", alignItems: "center" }}
+                  >
+                    <p className="text-[11px] font-mono text-foreground text-right">{row.valueChange}</p>
+                    <p className={`text-[11px] font-mono font-semibold text-right ${row.emissionsChange > 0 ? "text-red-400" : "text-emerald-400"}`}>
+                      {row.emissionsChange > 0 ? "+" : ""}{row.emissionsChange}
+                    </p>
                   </div>
-                </div>
-              );
-            })}
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* sentra.AI Recommendations */}
