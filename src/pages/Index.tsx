@@ -93,10 +93,8 @@ const Index = () => {
         <KPICardsRow onKPIClick={() => setDrawerOpen(true)} unitMode={unitMode} />
       </div>
 
-      {/* Trend Chart - full width */}
-      <div className="px-2">
-        <TrendChart onPointClick={handlePointClick} unitMode={unitMode} />
-      </div>
+      {/* Trend Chart - full width edge to edge */}
+      <TrendChart onPointClick={handlePointClick} unitMode={unitMode} />
 
       <div className="p-6 space-y-4 max-w-[1600px] mx-auto">
         {/* Breakdown Panels */}
