@@ -7,7 +7,7 @@ interface PeerBenchmarkProps {
   unitMode: UnitMode;
 }
 
-const intUnit = (mode: UnitMode) => mode === "energy" ? "TJ/t" : "kgCO2e/t";
+const intUnit = (mode: UnitMode) => mode === "energy" ? "TJ/t" : "tCO2e/t";
 
 const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
   const [group, setGroup] = useState(peerGroups[0]);
