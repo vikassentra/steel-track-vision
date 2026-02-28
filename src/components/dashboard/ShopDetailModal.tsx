@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
-import { X, AlertTriangle, ChevronRight, Sparkles } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { X, AlertTriangle, Sparkles, TrendingDown, CheckCircle, ChevronDown, ChevronUp } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { Badge } from "@/components/ui/badge";
 import { driverDetails } from "@/data/mockData";
 import DriverDetailModal from "./DriverDetailModal";
 
@@ -125,77 +126,120 @@ const ShopDetailModal = ({ shop, onClose }: ShopDetailModalProps) => {
             </div>
           </div>
 
-          {/* Stacked bar chart */}
-          <div className="mb-6">
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart
-                data={chartData}
-                layout="vertical"
-                barCategoryGap="16%"
-                onClick={(e: any) => e?.activeLabel && setSelectedDriver(e.activeLabel)}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 18%)" horizontal={false} />
-                <XAxis type="number" tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }} />
-                <YAxis type="category" dataKey="driver" tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }} width={100} />
-                <Tooltip content={<DriverTooltip />} />
-                <Legend
-                  wrapperStyle={{ fontSize: 10 }}
-                  formatter={(value: string) => {
-                    const labels: Record<string, string> = { scope1: "Scope 1", scope2: "Scope 2", scope3: "Scope 3" };
-                    return labels[value] || value;
-                  }}
-                />
-                <Bar dataKey="scope1" stackId="a" fill="hsl(168 70% 50%)" name="scope1" />
-                <Bar dataKey="scope2" stackId="a" fill="hsl(45 95% 58%)" name="scope2" />
-                <Bar dataKey="scope3" stackId="a" fill="hsl(270 60% 60%)" name="scope3" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+          {/* Individual driver cards with bar + details */}
+          <div className="space-y-2 mb-6">
+            {drivers.map((row) => {
+              const abs = Math.abs(row.emissionsChange);
+              const isS1 = row.scope === "Scope 1";
+              const isS2 = row.scope === "Scope 2";
+              const isS3 = row.scope === "Scope 3";
+              const s1 = isS1 ? abs : row.scope === "—" ? abs * 0.6 : 0;
+              const s2 = isS2 ? abs : row.scope === "—" ? abs * 0.2 : 0;
+              const s3 = isS3 ? abs : row.scope === "—" ? abs * 0.2 : 0;
+              const barData = [
+                { name: "S1", value: Math.round(s1), fill: "hsl(168 70% 50%)" },
+                { name: "S2", value: Math.round(s2), fill: "hsl(45 95% 58%)" },
+                { name: "S3", value: Math.round(s3), fill: "hsl(270 60% 60%)" },
+              ].filter((b) => b.value > 0);
+              return (
+                <div
+                  key={row.driver}
+                  onClick={() => setSelectedDriver(row.driver)}
+                  className="border border-border rounded-lg p-3 hover:border-primary/30 cursor-pointer transition-colors"
+                >
+                  <div className="flex items-start gap-4">
+                    {/* Left: chart */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        {row.anomaly && <AlertTriangle className="w-3 h-3 text-accent" />}
+                        <p className="text-xs font-semibold">{row.driver}</p>
+                      </div>
+                      <ResponsiveContainer width="100%" height={barData.length * 24 + 12}>
+                        <BarChart data={barData} layout="vertical" barGap={2}>
+                          <XAxis type="number" hide />
+                          <YAxis dataKey="name" type="category" width={24} tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} />
+                          <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11 }} />
+                          <Bar dataKey="value" radius={[0, 3, 3, 0]} barSize={12}>
+                            {barData.map((entry, idx) => (
+                              <Cell key={idx} fill={entry.fill} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                    {/* Right: details */}
+                    <div className="shrink-0 w-48 space-y-1.5 pt-1">
+                      <Badge variant="secondary" className="text-[9px]">{row.scope}</Badge>
+                      <div>
+                        <p className="text-[10px] text-muted-foreground">Δ Activity</p>
+                        <p className="text-xs font-medium">{row.valueChange}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-muted-foreground">Δ tCO₂e</p>
+                        <p className={`text-xs font-bold ${row.emissionsChange > 0 ? "text-red-400" : "text-emerald-400"}`}>
+                          {row.emissionsChange > 0 ? "+" : ""}{row.emissionsChange} tCO₂e
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
-          {/* Driver table */}
+          {/* sentra.AI Recommendations */}
           <div className="rounded-lg border border-border overflow-hidden">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="bg-secondary">
-                  <th className="text-left p-2.5 text-muted-foreground font-medium">Driver</th>
-                  <th className="text-left p-2.5 text-muted-foreground font-medium">Scope</th>
-                  <th className="text-right p-2.5 text-muted-foreground font-medium">Δ Activity</th>
-                  <th className="text-right p-2.5 text-muted-foreground font-medium">Δ tCO₂e</th>
-                  <th className="p-2.5 text-muted-foreground font-medium text-left">sentra.AI Recommendation</th>
-                  <th className="w-6"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {drivers.map((row) => (
-                  <tr
+            <div className="p-3 bg-secondary/30 border-b border-border flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <p className="text-xs font-semibold">sentra.AI Recommendations</p>
+              <Badge variant="secondary" className="text-[9px] ml-auto">
+                {drivers.length} drivers analyzed
+              </Badge>
+            </div>
+            <div className="divide-y divide-border/50">
+              {drivers.map((row) => {
+                const rec = getAIRecommendation(row.driver);
+                const status: "critical" | "warning" | "on-track" = 
+                  row.emissionsChange > 100 ? "critical" : 
+                  row.emissionsChange > 0 ? "warning" : "on-track";
+                const statusCfg = {
+                  critical: { label: "Critical", color: "text-red-400", bg: "bg-red-400/10", icon: <AlertTriangle className="w-3 h-3" /> },
+                  warning: { label: "Attention", color: "text-amber-400", bg: "bg-amber-400/10", icon: <AlertTriangle className="w-3 h-3" /> },
+                  "on-track": { label: "On Track", color: "text-emerald-400", bg: "bg-emerald-400/10", icon: <CheckCircle className="w-3 h-3" /> },
+                };
+                const cfg = statusCfg[status];
+                return (
+                  <div
                     key={row.driver}
+                    className="p-3 flex items-center gap-3 hover:bg-secondary/30 cursor-pointer transition-colors"
                     onClick={() => setSelectedDriver(row.driver)}
-                    className="border-t border-border hover:bg-secondary/50 cursor-pointer transition-colors"
                   >
-                    <td className="p-2.5 text-foreground flex items-center gap-1.5">
-                      {row.anomaly && <AlertTriangle className="w-3 h-3 text-accent" />}
-                      <span className="font-medium">{row.driver}</span>
-                    </td>
-                    <td className="p-2.5 text-muted-foreground">{row.scope}</td>
-                    <td className="p-2.5 text-right font-mono text-foreground">{row.valueChange}</td>
-                    <td className={`p-2.5 text-right font-mono font-medium ${
-                      row.emissionsChange > 0 ? "text-chart-negative" : "text-chart-positive"
-                    }`}>
-                      {row.emissionsChange > 0 ? "+" : ""}{row.emissionsChange}
-                    </td>
-                    <td className="p-2.5 max-w-[280px]">
-                      <p className="text-[10px] text-muted-foreground leading-relaxed truncate flex items-center gap-1">
-                        <Sparkles className="w-3 h-3 text-primary shrink-0" />
-                        {getAIRecommendation(row.driver)}
+                    <div className={`p-1.5 rounded ${cfg.bg} ${cfg.color} shrink-0`}>{cfg.icon}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold">{row.driver}</span>
+                        <Badge variant="outline" className={`text-[9px] ${cfg.color}`}>
+                          {cfg.label}
+                        </Badge>
+                        <Badge variant="secondary" className="text-[9px]">{row.scope}</Badge>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{rec}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className={`text-xs font-mono font-bold ${row.emissionsChange > 0 ? "text-red-400" : "text-emerald-400"}`}>
+                        {row.emissionsChange > 0 ? "+" : ""}{row.emissionsChange} tCO₂e
                       </p>
-                    </td>
-                    <td className="p-2.5">
-                      <ChevronRight className="w-3 h-3 text-muted-foreground" />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      {row.emissionsChange < 0 && (
+                        <p className="text-[10px] text-emerald-400 flex items-center justify-end gap-0.5 mt-0.5">
+                          <TrendingDown className="w-3 h-3" />
+                          saving
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
