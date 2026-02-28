@@ -47,14 +47,26 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <FilterBar
         activeFilters={activeFilters}
-        onRemoveFilter={handleRemoveFilter}
-        activeShop={activeShop}
-        onShopChange={setActiveShop} />
+        onRemoveFilter={handleRemoveFilter} />
 
 
       <div className="p-6 space-y-4 max-w-[1600px] mx-auto">
-        {/* Unit toggle */}
-        <div className="flex items-center justify-end">
+        {/* Shop + Unit toggles */}
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div className="flex bg-secondary rounded-md p-0.5">
+            {["COP", "SP", "BF", "BOF", "RM"].map((s) =>
+            <button
+              key={s}
+              onClick={() => setActiveShop(s)}
+              className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+              activeShop === s ?
+              "bg-primary text-primary-foreground" :
+              "text-muted-foreground hover:text-foreground"}`
+              }>
+                {s}
+              </button>
+            )}
+          </div>
           <div className="flex bg-secondary rounded-md p-0.5">
             {(["emissions", "energy"] as const).map((mode) =>
             <button
