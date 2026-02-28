@@ -19,7 +19,9 @@ const Index = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | undefined>();
   const [activeScope, setActiveScope] = useState("All");
-  const [activeFrequency, setActiveFrequency] = useState("Daily");
+  const [activeFrequency, setActiveFrequency] = useState<"Monthly" | "Daily">("Monthly");
+  const [fromMonth, setFromMonth] = useState("2023-01");
+  const [toMonth, setToMonth] = useState("2025-03");
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [unitMode, setUnitMode] = useState<UnitMode>("emissions");
   const [activeShop, setActiveShop] = useState("BF");
@@ -59,7 +61,14 @@ const Index = () => {
         activeFilters={activeFilters}
         onRemoveFilter={handleRemoveFilter}
         onOpenAnalytics={() => setAnalyticsOpen(true)}
-        onOpenSentraAI={() => setSentraAIOpen(true)} />
+        onOpenSentraAI={() => setSentraAIOpen(true)}
+        frequency={activeFrequency}
+        onFrequencyChange={setActiveFrequency}
+        fromMonth={fromMonth}
+        toMonth={toMonth}
+        onFromMonthChange={setFromMonth}
+        onToMonthChange={setToMonth}
+      />
 
 
       <div className="p-6 space-y-4 max-w-[1600px] mx-auto">
