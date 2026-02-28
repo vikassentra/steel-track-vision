@@ -29,11 +29,9 @@ const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
   const median = peerBenchmarks.find((p) => p.name === "Industry Median");
   const peersSorted = [...peers].sort((a, b) => a.intensity - b.intensity);
 
-  // Add "You (Today)" into the peer chart for direct comparison
-  const peerWithYou = [
-    ...peersSorted,
-    { name: "You (Today)", intensity: 2.85, type: "you" as const },
-  ].sort((a, b) => a.intensity - b.intensity);
+  // Peers only — "You (Today)" shown as a reference line
+  const yourTodayIntensity = 2.85;
+  const peerWithYou = peersSorted;
 
   const tooltipStyle = {
     background: "hsl(220 18% 12%)",
@@ -140,16 +138,12 @@ const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
             </p>
             <div className="flex items-center gap-2 text-[9px] text-muted-foreground">
               <span className="flex items-center gap-1">
-                <span className="inline-block w-2 h-2 rounded-sm" style={{ background: "hsl(168 70% 50%)" }} />
-                You
+                <span className="inline-block w-3 border-t border-dashed" style={{ borderColor: "hsl(330 80% 60%)" }} />
+                You (Today)
               </span>
               <span className="flex items-center gap-1">
-                <span className="inline-block w-2 h-2 rounded-full" style={{ background: "hsl(215 20% 45%)" }} />
+                <span className="inline-block w-2 h-2 rounded-sm" style={{ background: "hsl(215 20% 45%)" }} />
                 Peers
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="inline-block w-3 h-0.5" style={{ background: "hsl(330 80% 60%)" }} />
-                Median
               </span>
             </div>
           </div>
@@ -172,19 +166,17 @@ const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
                 tickLine={false}
               />
               <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v} ${u}`]} />
-              {median && (
-                <ReferenceLine
-                  x={median.intensity}
-                  stroke="hsl(330 80% 60%)"
-                  strokeDasharray="4 4"
-                  label={{
-                    value: `Median ${median.intensity}`,
-                    fontSize: 9,
-                    fill: "hsl(330 80% 60%)",
-                    position: "top",
-                  }}
-                />
-              )}
+              <ReferenceLine
+                x={yourTodayIntensity}
+                stroke="hsl(330 80% 60%)"
+                strokeDasharray="4 4"
+                label={{
+                  value: `You ${yourTodayIntensity}`,
+                  fontSize: 9,
+                  fill: "hsl(330 80% 60%)",
+                  position: "top",
+                }}
+              />
               <Bar dataKey="intensity" radius={[0, 6, 6, 0]} barSize={20}>
                 <LabelList
                   dataKey="intensity"
@@ -194,12 +186,8 @@ const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
                 {peerWithYou.map((entry) => (
                   <Cell
                     key={entry.name}
-                    fill={
-                      entry.type === "you"
-                        ? "hsl(168 70% 50%)"
-                        : "hsl(215 20% 35%)"
-                    }
-                    opacity={entry.type === "you" ? 1 : 0.7}
+                    fill="hsl(215 20% 35%)"
+                    opacity={0.7}
                   />
                 ))}
               </Bar>
