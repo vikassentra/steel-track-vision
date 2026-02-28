@@ -9,8 +9,6 @@ import { plants } from "@/data/mockData";
 
 export type UnitMode = "emissions" | "energy";
 
-const plantsWithoutAll = plants.filter((p) => p !== "All Plants");
-
 const Index = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | undefined>();
@@ -18,7 +16,7 @@ const Index = () => {
   const [activeFrequency, setActiveFrequency] = useState("Daily");
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [unitMode, setUnitMode] = useState<UnitMode>("emissions");
-  const [activePlant, setActivePlant] = useState(plantsWithoutAll[0]);
+  const [activeShop, setActiveShop] = useState("BF");
 
   const handlePointClick = (date: string) => {
     setSelectedDate(date);
@@ -49,27 +47,14 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <FilterBar
         activeFilters={activeFilters}
-        onRemoveFilter={handleRemoveFilter} />
+        onRemoveFilter={handleRemoveFilter}
+        activeShop={activeShop}
+        onShopChange={setActiveShop} />
 
 
       <div className="p-6 space-y-4 max-w-[1600px] mx-auto">
-        {/* Plant toggles + Unit toggle */}
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <div className="flex bg-secondary rounded-md p-0.5">
-            {plantsWithoutAll.map((p) =>
-            <button
-              key={p}
-              onClick={() => setActivePlant(p)}
-              className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
-              activePlant === p ?
-              "bg-primary text-primary-foreground" :
-              "text-muted-foreground hover:text-foreground"}`
-              }>
-
-                {p}
-              </button>
-            )}
-          </div>
+        {/* Unit toggle */}
+        <div className="flex items-center justify-end">
           <div className="flex bg-secondary rounded-md p-0.5">
             {(["emissions", "energy"] as const).map((mode) =>
             <button
@@ -80,7 +65,6 @@ const Index = () => {
               "bg-accent text-accent-foreground" :
               "text-muted-foreground hover:text-foreground"}`
               }>
-
                 {mode === "emissions" ? "Emissions" : "Energy"}
               </button>
             )}
