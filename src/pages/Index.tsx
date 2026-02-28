@@ -114,6 +114,7 @@ const Index = () => {
         <KPICardsRow
           onKPIClick={() => setDrawerOpen(true)}
           unitMode={unitMode}
+          frequency={activeFrequency}
           onMetricClick={(m) => setSelectedMetric(m)}
           onSeeAllMetrics={() => setAllMetricsOpen(true)}
         />
@@ -131,7 +132,7 @@ const Index = () => {
       </div>
 
       {/* Trend Chart - full width edge to edge, after Peer Benchmark */}
-      <TrendChart onPointClick={handlePointClick} unitMode={unitMode} />
+      <TrendChart onPointClick={handlePointClick} unitMode={unitMode} frequency={activeFrequency} />
 
       <div className="p-6 max-w-[1600px] mx-auto">
         {/* Footer */}
