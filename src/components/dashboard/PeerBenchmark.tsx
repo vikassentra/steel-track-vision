@@ -3,23 +3,23 @@ import { peerBenchmarks, peerGroups } from "@/data/mockData";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell, ReferenceLine, LabelList,
-  ComposedChart, Line, Scatter
-} from "recharts";
+  ComposedChart, Line, Scatter } from
+"recharts";
 import type { UnitMode } from "@/pages/Index";
 
 interface PeerBenchmarkProps {
   unitMode: UnitMode;
 }
 
-const intUnit = (mode: UnitMode) => (mode === "energy" ? "TJ/t" : "tCO2e/t");
+const intUnit = (mode: UnitMode) => mode === "energy" ? "TJ/t" : "tCO2e/t";
 
 const yourTrend = [
-  { period: "FY 24", value: 3.05 },
-  { period: "FY 25", value: 2.92 },
-  { period: "FY 26", value: 2.81 },
-  { period: "Prev Mo", value: 2.78 },
-  { period: "Today", value: 2.85 },
-];
+{ period: "FY 24", value: 3.05 },
+{ period: "FY 25", value: 2.92 },
+{ period: "FY 26", value: 2.81 },
+{ period: "Prev Mo", value: 2.78 },
+{ period: "Today", value: 2.85 }];
+
 
 const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
   const [group, setGroup] = useState(peerGroups[0]);
@@ -38,7 +38,7 @@ const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
     border: "1px solid hsl(220 15% 22%)",
     borderRadius: 8,
     fontSize: 11,
-    boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+    boxShadow: "0 8px 32px rgba(0,0,0,0.4)"
   };
 
   return (
@@ -53,15 +53,15 @@ const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
             Intensity comparison ({u} crude steel)
           </p>
         </div>
-        <select
-          value={group}
-          onChange={(e) => setGroup(e.target.value)}
-          className="px-3 py-1.5 text-xs bg-secondary rounded-md text-secondary-foreground border-none outline-none cursor-pointer"
-        >
-          {peerGroups.map((g) => (
-            <option key={g} value={g}>{g}</option>
-          ))}
-        </select>
+        
+
+
+
+
+
+
+
+
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
@@ -99,23 +99,23 @@ const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
                 dataKey="period"
                 tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }}
                 axisLine={false}
-                tickLine={false}
-              />
+                tickLine={false} />
+
               <YAxis
                 tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }}
                 domain={[2.4, 3.2]}
                 axisLine={false}
-                tickLine={false}
-              />
+                tickLine={false} />
+
               <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v} ${u}`, "Intensity"]} />
               <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={36}>
                 <LabelList dataKey="value" position="top" style={{ fontSize: 10, fill: "hsl(215 15% 65%)", fontFamily: "monospace" }} />
-                {yourTrend.map((_, i) => (
-                  <Cell
-                    key={i}
-                    fill={i === yourTrend.length - 1 ? "url(#barGradient)" : "url(#barGradientHist)"}
-                  />
-                ))}
+                {yourTrend.map((_, i) =>
+                <Cell
+                  key={i}
+                  fill={i === yourTrend.length - 1 ? "url(#barGradient)" : "url(#barGradientHist)"} />
+
+                )}
               </Bar>
               <Line
                 type="monotone"
@@ -123,8 +123,8 @@ const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
                 stroke="hsl(330 80% 60%)"
                 strokeWidth={2}
                 dot={false}
-                strokeDasharray="4 4"
-              />
+                strokeDasharray="4 4" />
+
               <Scatter dataKey="value" fill="hsl(330 80% 60%)" r={3} />
             </ComposedChart>
           </ResponsiveContainer>
@@ -155,16 +155,16 @@ const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
                 tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }}
                 domain={[0, 3.5]}
                 axisLine={false}
-                tickLine={false}
-              />
+                tickLine={false} />
+
               <YAxis
                 dataKey="name"
                 type="category"
                 tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }}
                 width={90}
                 axisLine={false}
-                tickLine={false}
-              />
+                tickLine={false} />
+
               <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v} ${u}`]} />
               <ReferenceLine
                 x={yourTodayIntensity}
@@ -174,22 +174,22 @@ const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
                   value: `You ${yourTodayIntensity}`,
                   fontSize: 9,
                   fill: "hsl(330 80% 60%)",
-                  position: "top",
-                }}
-              />
+                  position: "top"
+                }} />
+
               <Bar dataKey="intensity" radius={[0, 6, 6, 0]} barSize={20}>
                 <LabelList
                   dataKey="intensity"
                   position="right"
-                  style={{ fontSize: 9, fill: "hsl(215 15% 55%)", fontFamily: "monospace" }}
-                />
-                {peerWithYou.map((entry) => (
-                  <Cell
-                    key={entry.name}
-                    fill="hsl(215 20% 35%)"
-                    opacity={0.7}
-                  />
-                ))}
+                  style={{ fontSize: 9, fill: "hsl(215 15% 55%)", fontFamily: "monospace" }} />
+
+                {peerWithYou.map((entry) =>
+                <Cell
+                  key={entry.name}
+                  fill="hsl(215 20% 35%)"
+                  opacity={0.7} />
+
+                )}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -199,8 +199,8 @@ const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
       <p className="text-[10px] text-muted-foreground italic leading-relaxed mt-3">
         Benchmark is normalized by route/grade where possible. Data sources: WSA, company reports.
       </p>
-    </div>
-  );
+    </div>);
+
 };
 
 export default PeerBenchmark;
