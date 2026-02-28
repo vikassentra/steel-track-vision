@@ -37,7 +37,7 @@ const TrendChart = ({ onPointClick, unitMode }: TrendChartProps) => {
   }));
 
   return (
-    <div className="bg-card rounded-lg border border-border p-5">
+    <div className="bg-card border-y border-border px-4 py-5">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-sm font-semibold text-foreground">Emissions Trend</h3>
