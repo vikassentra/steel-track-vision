@@ -1,7 +1,7 @@
-import { shopBreakdowns, scopeCategories } from "@/data/mockData";
+import { shopBreakdowns, scopeCategories, driverDetails } from "@/data/mockData";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell
+  Cell
 } from "recharts";
 import type { UnitMode } from "@/pages/Index";
 
@@ -67,27 +67,15 @@ const BreakdownPanels = ({ onShopClick, onScopeClick, activeScope, unitMode }: B
         </ResponsiveContainer>
       </div>
 
-      {/* By Scope (Donut) */}
+      {/* By Scope (Horizontal Bar) */}
       <div className="bg-card rounded-lg border border-border p-5">
         <h3 className="text-sm font-semibold text-foreground mb-1">Emissions by Scope</h3>
         <p className="text-xs text-muted-foreground mb-3">{u} — click to filter categories</p>
         <ResponsiveContainer width="100%" height={240}>
-          <PieChart>
-            <Pie
-              data={scopeTotals}
-              cx="50%"
-              cy="50%"
-              innerRadius={55}
-              outerRadius={90}
-              paddingAngle={3}
-              dataKey="value"
-              onClick={(_, idx) => onScopeClick(scopeTotals[idx].name)}
-              className="cursor-pointer"
-            >
-              {scopeTotals.map((entry) => (
-                <Cell key={entry.name} fill={entry.color} stroke="none" />
-              ))}
-            </Pie>
+          <BarChart data={scopeTotals} layout="vertical" onClick={(e: any) => e?.activeLabel && onScopeClick(e.activeLabel)}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 18%)" horizontal={false} />
+            <XAxis type="number" tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }} />
+            <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }} width={60} />
             <Tooltip
               formatter={(value: number) => [`${value.toLocaleString()} ${u}`]}
               contentStyle={{
@@ -97,46 +85,37 @@ const BreakdownPanels = ({ onShopClick, onScopeClick, activeScope, unitMode }: B
                 fontSize: 12,
               }}
             />
-          </PieChart>
+            <Bar dataKey="value" radius={[0, 4, 4, 0]} className="cursor-pointer">
+              {scopeTotals.map((entry) => (
+                <Cell key={entry.name} fill={entry.color} />
+              ))}
+            </Bar>
+          </BarChart>
         </ResponsiveContainer>
-        <div className="flex justify-center gap-4 text-xs mt-2">
-          {scopeTotals.map((s) => (
-            <button
-              key={s.name}
-              onClick={() => onScopeClick(s.name)}
-              className="flex items-center gap-1 hover:opacity-80"
-            >
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: s.color }} />
-              {s.name}
-            </button>
-          ))}
-        </div>
       </div>
 
-      {/* By Category */}
+      {/* Top 5 Drivers */}
       <div className="bg-card rounded-lg border border-border p-5">
-        <h3 className="text-sm font-semibold text-foreground mb-1">Top Contributors</h3>
-        <p className="text-xs text-muted-foreground mb-3">
-          {activeScope === "All" ? "All scopes" : activeScope} — % contribution
-        </p>
+        <h3 className="text-sm font-semibold text-foreground mb-1">Top Drivers</h3>
+        <p className="text-xs text-muted-foreground mb-3">Top 5 by emissions impact</p>
         <div className="space-y-2.5">
-          {filteredCategories.slice(0, 5).map((cat) => (
-            <div key={cat.category} className="group cursor-pointer">
-              <div className="flex items-center justify-between text-xs mb-1">
-                <span className="text-foreground group-hover:text-primary transition-colors">{cat.category}</span>
-                <span className="text-muted-foreground font-mono">{cat.value.toLocaleString()} {u}</span>
+          {driverDetails
+            .sort((a, b) => Math.abs(b.emissionsChange) - Math.abs(a.emissionsChange))
+            .slice(0, 5)
+            .map((d) => (
+              <div key={d.driver} className="group cursor-pointer">
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <span className="text-foreground group-hover:text-primary transition-colors">{d.driver}</span>
+                  <span className={`font-mono font-medium ${d.emissionsChange > 0 ? "text-chart-negative" : "text-chart-positive"}`}>
+                    {d.emissionsChange > 0 ? "+" : ""}{d.emissionsChange} tCO₂e
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                  <span>{d.shop} · {d.scope}</span>
+                  <span className="font-mono">{d.valueChange}</span>
+                </div>
               </div>
-              <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all"
-                  style={{
-                    width: `${cat.percentage}%`,
-                    backgroundColor: SCOPE_COLORS[cat.scope],
-                  }}
-                />
-              </div>
-            </div>
-          ))}
+            ))}
         </div>
       </div>
     </div>
