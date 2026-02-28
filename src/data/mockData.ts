@@ -75,6 +75,6 @@ export const peerBenchmarks: PeerBenchmark[] = [
 ];
 
 export const plants = ["All Plants", "Rourkela Works", "Burnpur Works", "Durgapur Steel"];
-export const steelShops = ["Coke Oven", "Sinter Plant", "Blast Furnace", "BOF / SMS", "Rolling Mill", "Power / CPP"];
+export const steelPlants = ["Coke Oven", "Sinter Plant", "Blast Furnace", "BOF / SMS", "Rolling Mill", "Power / CPP"];
 export const products = ["All Products", "Rebar", "Billets", "Wire Rod", "HR Coil"];
 export const peerGroups = ["India BF-BOF Integrated", "India EAF Mills", "Similar Capacity (3-5 MTPA)", "Global BF-BOF"];

@@ -11,7 +11,7 @@ interface RunAnalyticsModalProps {
   onClose: () => void;
 }
 
-const locations = ["Rourkela Works", "Burnpur Works", "Durgapur Steel"];
+const sites = ["Rourkela Works", "Burnpur Works", "Durgapur Steel"];
 const timePeriods = ["FY24 Q1", "FY24 Q2", "FY24 Q3", "FY24 Q4", "FY25 Q1", "FY25 Q2"];
 const drivers = ["Coke Rate", "PCI Rate", "Scrap Ratio", "Power Mix", "BFG Recovery", "Sinter Ratio"];
 
@@ -61,7 +61,7 @@ const driverComparisonData = drivers.map((d) => ({
   Durgapur: Math.round(320 + Math.random() * 220),
 }));
 
-type Tab = "location" | "time" | "drivers";
+type Tab = "site" | "time" | "drivers";
 
 const allTimePeriods = ["FY23 Q1", "FY23 Q2", "FY23 Q3", "FY23 Q4", "FY24 Q1", "FY24 Q2", "FY24 Q3", "FY24 Q4", "FY25 Q1", "FY25 Q2"];
 
@@ -96,18 +96,18 @@ const driverUnits: Record<string, string> = {
 };
 
 const RunAnalyticsModal = ({ open, onClose }: RunAnalyticsModalProps) => {
-  const [activeTab, setActiveTab] = useState<Tab>("location");
-  const [selectedLocations, setSelectedLocations] = useState<string[]>(["Rourkela Works", "Burnpur Works"]);
+  const [activeTab, setActiveTab] = useState<Tab>("site");
+  const [selectedSites, setSelectedSites] = useState<string[]>(["Rourkela Works", "Burnpur Works"]);
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>(defaultMetrics);
   const [addMenuOpen, setAddMenuOpen] = useState(false);
   // Time period tab state
   const [trendPeriods, setTrendPeriods] = useState<string[]>(["FY24 Q1", "FY24 Q2", "FY24 Q3", "FY24 Q4", "FY25 Q1", "FY25 Q2"]);
-  const [trendLocations, setTrendLocations] = useState<string[]>(["Rourkela Works", "Burnpur Works", "Durgapur Steel"]);
+  const [trendSites, setTrendSites] = useState<string[]>(["Rourkela Works", "Burnpur Works", "Durgapur Steel"]);
   const [trendDriver, setTrendDriver] = useState<string>("Intensity");
   // Driver comparison tab state
   const allDrivers = ["Coke Rate", "PCI Rate", "Scrap Ratio", "Power Mix", "BFG Recovery", "Sinter Ratio", "Slag Rate", "Pellet Ratio", "COG Recovery", "Limestone"];
   const [driverTabDrivers, setDriverTabDrivers] = useState<string[]>(["Coke Rate", "PCI Rate", "Scrap Ratio", "Power Mix", "BFG Recovery", "Sinter Ratio"]);
-  const [driverTabLocations, setDriverTabLocations] = useState<string[]>(["Rourkela Works", "Burnpur Works", "Durgapur Steel"]);
+  const [driverTabSites, setDriverTabSites] = useState<string[]>(["Rourkela Works", "Burnpur Works", "Durgapur Steel"]);
   const [driverAddMenuOpen, setDriverAddMenuOpen] = useState(false);
   const driverAvailableToAdd = allDrivers.filter((d) => !driverTabDrivers.includes(d));
   const filteredDriverData = driverTabDrivers.map((d) => ({
@@ -116,14 +116,14 @@ const RunAnalyticsModal = ({ open, onClose }: RunAnalyticsModalProps) => {
     Burnpur: Math.round(280 + Math.abs(d.charCodeAt(1) * 5 % 180)),
     Durgapur: Math.round(320 + Math.abs(d.charCodeAt(2) * 6 % 220)),
   }));
-  const locationColors: Record<string, string> = {
+  const siteColors: Record<string, string> = {
     "Rourkela Works": "hsl(168 70% 50%)",
     "Burnpur Works": "hsl(45 95% 58%)",
     "Durgapur Steel": "hsl(270 60% 60%)",
   };
 
-  const toggleLocation = (loc: string) => {
-    setSelectedLocations((prev) =>
+  const toggleSite = (loc: string) => {
+    setSelectedSites((prev) =>
       prev.includes(loc) ? prev.filter((l) => l !== loc) : [...prev, loc]
     );
   };
@@ -143,7 +143,7 @@ const RunAnalyticsModal = ({ open, onClose }: RunAnalyticsModalProps) => {
   const filteredData = allAvailableMetrics.filter((m) => selectedMetrics.includes(m.metric));
 
   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
-    { key: "location", label: "Cross-Location", icon: <Factory className="w-3.5 h-3.5" /> },
+    { key: "site", label: "Cross-Site", icon: <Factory className="w-3.5 h-3.5" /> },
     { key: "time", label: "Time Period", icon: <Calendar className="w-3.5 h-3.5" /> },
     { key: "drivers", label: "Driver Comparison", icon: <Fuel className="w-3.5 h-3.5" /> },
   ];
@@ -156,7 +156,7 @@ const RunAnalyticsModal = ({ open, onClose }: RunAnalyticsModalProps) => {
             <ArrowRightLeft className="w-5 h-5 text-primary" />
             Run Analytics
           </DialogTitle>
-          <p className="text-xs text-muted-foreground">Compare emissions performance across locations, time periods, and drivers</p>
+          <p className="text-xs text-muted-foreground">Compare emissions performance across sites, time periods, and drivers</p>
         </DialogHeader>
 
         {/* Tab Selector */}
@@ -177,22 +177,22 @@ const RunAnalyticsModal = ({ open, onClose }: RunAnalyticsModalProps) => {
           ))}
         </div>
 
-        {/* Location Selector */}
+        {/* Site Selector */}
         <div className="flex gap-1.5 flex-wrap">
-          {locations.map((loc) => (
+          {sites.map((loc) => (
             <Badge
               key={loc}
-              variant={selectedLocations.includes(loc) ? "default" : "secondary"}
+              variant={selectedSites.includes(loc) ? "default" : "secondary"}
               className="cursor-pointer text-xs"
-              onClick={() => toggleLocation(loc)}
+              onClick={() => toggleSite(loc)}
             >
               {loc}
             </Badge>
           ))}
         </div>
 
-        {/* Cross-Location Tab */}
-        {activeTab === "location" && (
+        {/* Cross-Site Tab */}
+        {activeTab === "site" && (
           <div className="space-y-4">
             {/* Metrics selector chips */}
             <div className="flex items-center gap-1.5 flex-wrap">
@@ -238,7 +238,7 @@ const RunAnalyticsModal = ({ open, onClose }: RunAnalyticsModalProps) => {
                 <thead>
                   <tr className="bg-secondary/50">
                     <th className="text-left p-2.5 font-medium text-muted-foreground">Metric</th>
-                    {locations.map((loc) => (
+                    {sites.map((loc) => (
                       <th key={loc} className="text-right p-2.5 font-medium text-muted-foreground">{loc.split(" ")[0]}</th>
                     ))}
                     <th className="text-right p-2.5 font-medium text-muted-foreground">Unit</th>
@@ -327,17 +327,17 @@ const RunAnalyticsModal = ({ open, onClose }: RunAnalyticsModalProps) => {
                 </div>
               </div>
 
-              {/* Location selector */}
+              {/* Site selector */}
               <div className="space-y-1.5">
-                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Locations</p>
+                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Sites</p>
                 <div className="flex gap-1 flex-wrap">
-                  {locations.map((loc) => (
+                  {sites.map((loc) => (
                     <Badge
                       key={loc}
-                      variant={trendLocations.includes(loc) ? "default" : "secondary"}
+                      variant={trendSites.includes(loc) ? "default" : "secondary"}
                       className="cursor-pointer text-[10px]"
                       onClick={() =>
-                        setTrendLocations((prev) =>
+                        setTrendSites((prev) =>
                           prev.includes(loc) ? prev.filter((l) => l !== loc) : [...prev, loc]
                         )
                       }
@@ -368,17 +368,17 @@ const RunAnalyticsModal = ({ open, onClose }: RunAnalyticsModalProps) => {
 
             {/* Chart */}
             <div className="bg-secondary/30 rounded-lg p-4">
-              <p className="text-xs font-medium mb-3">{trendDriver} Trend by Location ({driverUnits[trendDriver] || ""})</p>
+              <p className="text-xs font-medium mb-3">{trendDriver} Trend by Site ({driverUnits[trendDriver] || ""})</p>
               <ResponsiveContainer width="100%" height={280}>
-                <LineChart data={generateTrendData(trendPeriods.sort(), trendLocations, trendDriver)}>
+                <LineChart data={generateTrendData(trendPeriods.sort(), trendSites, trendDriver)}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="period" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
                   <YAxis domain={["auto", "auto"]} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
                   <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11 }} />
                   <Legend wrapperStyle={{ fontSize: 10 }} />
-                  {trendLocations.includes("Rourkela Works") && <Line type="monotone" dataKey="Rourkela" stroke="hsl(168 70% 50%)" strokeWidth={2} dot={{ r: 3 }} />}
-                  {trendLocations.includes("Burnpur Works") && <Line type="monotone" dataKey="Burnpur" stroke="hsl(45 95% 58%)" strokeWidth={2} dot={{ r: 3 }} />}
-                  {trendLocations.includes("Durgapur Steel") && <Line type="monotone" dataKey="Durgapur" stroke="hsl(270 60% 60%)" strokeWidth={2} dot={{ r: 3 }} />}
+                  {trendSites.includes("Rourkela Works") && <Line type="monotone" dataKey="Rourkela" stroke="hsl(168 70% 50%)" strokeWidth={2} dot={{ r: 3 }} />}
+                  {trendSites.includes("Burnpur Works") && <Line type="monotone" dataKey="Burnpur" stroke="hsl(45 95% 58%)" strokeWidth={2} dot={{ r: 3 }} />}
+                  {trendSites.includes("Durgapur Steel") && <Line type="monotone" dataKey="Durgapur" stroke="hsl(270 60% 60%)" strokeWidth={2} dot={{ r: 3 }} />}
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -389,7 +389,7 @@ const RunAnalyticsModal = ({ open, onClose }: RunAnalyticsModalProps) => {
                 { loc: "Rourkela", change: -4.2, best: "FY25 Q1" },
                 { loc: "Burnpur", change: -6.8, best: "FY25 Q2" },
                 { loc: "Durgapur", change: -1.5, best: "FY24 Q4" },
-              ].filter((s) => trendLocations.some((l) => l.startsWith(s.loc))).map((s) => (
+              ].filter((s) => trendSites.some((l) => l.startsWith(s.loc))).map((s) => (
                 <div key={s.loc} className="bg-secondary/30 rounded-lg p-3">
                   <p className="text-xs font-medium">{s.loc}</p>
                   <p className={`text-sm font-bold mt-1 ${s.change < -3 ? "text-emerald-400" : "text-amber-400"}`}>{s.change}%</p>
@@ -409,13 +409,13 @@ const RunAnalyticsModal = ({ open, onClose }: RunAnalyticsModalProps) => {
               <div className="space-y-1.5">
                 <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Sites</p>
                 <div className="flex gap-1 flex-wrap">
-                  {locations.map((loc) => (
+                  {sites.map((loc) => (
                     <Badge
                       key={loc}
-                      variant={driverTabLocations.includes(loc) ? "default" : "secondary"}
+                      variant={driverTabSites.includes(loc) ? "default" : "secondary"}
                       className="cursor-pointer text-[10px]"
                       onClick={() =>
-                        setDriverTabLocations((prev) =>
+                        setDriverTabSites((prev) =>
                           prev.includes(loc) ? prev.filter((l) => l !== loc) : [...prev, loc]
                         )
                       }
@@ -485,9 +485,9 @@ const RunAnalyticsModal = ({ open, onClose }: RunAnalyticsModalProps) => {
                 };
                 const meta = driverMeta[row.driver] || { scope: "Scope 1", deltaActivity: "—", deltaCO2: 0 };
                 const chartData = [
-                  ...(driverTabLocations.includes("Rourkela Works") ? [{ name: "Rourkela", value: row.Rourkela, fill: "hsl(168 70% 50%)" }] : []),
-                  ...(driverTabLocations.includes("Burnpur Works") ? [{ name: "Burnpur", value: row.Burnpur, fill: "hsl(45 95% 58%)" }] : []),
-                  ...(driverTabLocations.includes("Durgapur Steel") ? [{ name: "Durgapur", value: row.Durgapur, fill: "hsl(270 60% 60%)" }] : []),
+                  ...(driverTabSites.includes("Rourkela Works") ? [{ name: "Rourkela", value: row.Rourkela, fill: "hsl(168 70% 50%)" }] : []),
+                  ...(driverTabSites.includes("Burnpur Works") ? [{ name: "Burnpur", value: row.Burnpur, fill: "hsl(45 95% 58%)" }] : []),
+                  ...(driverTabSites.includes("Durgapur Steel") ? [{ name: "Durgapur", value: row.Durgapur, fill: "hsl(270 60% 60%)" }] : []),
                 ];
                 return (
                   <div key={row.driver} className="border border-border rounded-lg p-3 hover:border-primary/30 transition-colors">

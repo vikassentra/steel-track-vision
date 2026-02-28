@@ -82,9 +82,9 @@ const BreakdownPanels = ({ onShopClick, onScopeClick, onDriverClick, activeScope
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      {/* By Steel Shops */}
+      {/* By Plant */}
       <div className="bg-card rounded-lg border border-border p-5">
-        <h3 className="text-sm font-semibold text-foreground mb-1">Emissions by Shop</h3>
+        <h3 className="text-sm font-semibold text-foreground mb-1">Emissions by Plant</h3>
         <p className="text-xs text-muted-foreground mb-3">{u} — click to filter</p>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={shopBreakdowns} onClick={(e: any) => e?.activeLabel && onShopClick(e.activeLabel)}>
