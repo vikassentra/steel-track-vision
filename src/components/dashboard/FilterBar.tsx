@@ -5,33 +5,12 @@ import { Badge } from "@/components/ui/badge";
 interface FilterBarProps {
   activeFilters: string[];
   onRemoveFilter: (f: string) => void;
-  activeShop: string;
-  onShopChange: (shop: string) => void;
 }
 
-const shops = ["COP", "SP", "BF", "BOF", "RM"];
-
-const FilterBar = ({ activeFilters, onRemoveFilter, activeShop, onShopChange }: FilterBarProps) => {
+const FilterBar = ({ activeFilters, onRemoveFilter }: FilterBarProps) => {
   return (
     <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
-      <div className="px-6 py-3 flex items-center justify-between gap-4 flex-wrap">
-        {/* Left: Shop toggle */}
-        <div className="flex bg-secondary rounded-md p-0.5">
-          {shops.map((s) => (
-            <button
-              key={s}
-              onClick={() => onShopChange(s)}
-              className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
-                activeShop === s
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
-
+      <div className="px-6 py-3 flex items-center justify-end gap-4 flex-wrap">
         {/* Right: Date & Export */}
         <div className="flex items-center gap-2">
           <button className="flex items-center gap-2 px-3 py-1.5 text-xs bg-secondary rounded-md text-secondary-foreground hover:bg-surface-overlay transition-colors">
