@@ -37,10 +37,6 @@ const FilterBar = ({ activeFilters, onRemoveFilter }: FilterBarProps) => {
             <Calendar className="w-3.5 h-3.5" />
             <span>Jan '23 – Mar '25</span>
           </button>
-          <Button variant="outline" size="sm" className="text-xs gap-1.5">
-            <Download className="w-3.5 h-3.5" />
-            Export
-          </Button>
         </div>
       </div>
 
