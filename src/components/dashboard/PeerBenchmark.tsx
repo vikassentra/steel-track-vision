@@ -28,11 +28,11 @@ const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
         <select
           value={group}
           onChange={(e) => setGroup(e.target.value)}
-          className="px-3 py-1.5 text-xs bg-secondary rounded-md text-secondary-foreground border-none outline-none cursor-pointer"
-        >
-          {peerGroups.map((g) => (
-            <option key={g} value={g}>{g}</option>
-          ))}
+          className="px-3 py-1.5 text-xs bg-secondary rounded-md text-secondary-foreground border-none outline-none cursor-pointer">
+
+          {peerGroups.map((g) =>
+          <option key={g} value={g}>{g}</option>
+          )}
         </select>
       </div>
 
@@ -48,20 +48,20 @@ const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
                   background: "hsl(220 18% 15%)",
                   border: "1px solid hsl(220 15% 22%)",
                   borderRadius: 8,
-                  fontSize: 12,
+                  fontSize: 12
                 }}
-                formatter={(v: number) => [`${v} ${u}`]}
-              />
-              {median && (
-                <ReferenceLine x={median.intensity} stroke="hsl(330 80% 60%)" strokeDasharray="4 4" label={{ value: "Median", fontSize: 10, fill: "hsl(330 80% 60%)" }} />
-              )}
+                formatter={(v: number) => [`${v} ${u}`]} />
+
+              {median &&
+              <ReferenceLine x={median.intensity} stroke="hsl(330 80% 60%)" strokeDasharray="4 4" label={{ value: "Median", fontSize: 10, fill: "hsl(330 80% 60%)" }} />
+              }
               <Bar dataKey="intensity" radius={[0, 4, 4, 0]}>
-                {sorted.map((entry) => (
-                  <Cell
-                    key={entry.name}
-                    fill={entry.type === "you" ? "hsl(168 70% 50%)" : "hsl(215 15% 35%)"}
-                  />
-                ))}
+                {sorted.map((entry) =>
+                <Cell
+                  key={entry.name}
+                  fill={entry.type === "you" ? "hsl(168 70% 50%)" : "hsl(215 15% 35%)"} />
+
+                )}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -83,18 +83,18 @@ const PeerBenchmark = ({ unitMode }: PeerBenchmarkProps) => {
               <span className="text-muted-foreground">Median</span>
               <span className="text-foreground font-mono">3.04</span>
             </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">Your value</span>
-              <span className="text-primary font-mono font-medium">{yourValue?.intensity}</span>
-            </div>
+            
+
+
+
           </div>
           <p className="text-[10px] text-muted-foreground italic leading-relaxed">
             Benchmark is normalized by route/grade where possible. Data sources: WSA, company reports.
           </p>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default PeerBenchmark;
