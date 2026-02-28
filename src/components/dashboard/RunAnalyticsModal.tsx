@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, Cell } from "recharts";
-import { ArrowRightLeft, TrendingUp, Factory, Fuel, Calendar, Plus, X } from "lucide-react";
+import { ArrowRightLeft, TrendingUp, Factory, Fuel, Calendar, Plus, X, Sparkles, AlertTriangle, CheckCircle, TrendingDown, ChevronDown, ChevronUp } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface RunAnalyticsModalProps {
@@ -468,40 +468,127 @@ const RunAnalyticsModal = ({ open, onClose }: RunAnalyticsModalProps) => {
               </div>
             </div>
 
-            {/* Chart */}
-            <div className="bg-secondary/30 rounded-lg p-4">
-              <p className="text-xs font-medium mb-3">Driver Impact by Location (tCO₂e contribution)</p>
-              <ResponsiveContainer width="100%" height={filteredDriverData.length * 50 + 40}>
-                <BarChart data={filteredDriverData} layout="vertical" barGap={2}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis type="number" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                  <YAxis dataKey="driver" type="category" width={90} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11 }} />
-                  <Legend wrapperStyle={{ fontSize: 10 }} />
-                  {driverTabLocations.includes("Rourkela Works") && <Bar dataKey="Rourkela" fill="hsl(168 70% 50%)" radius={[0, 3, 3, 0]} barSize={14} />}
-                  {driverTabLocations.includes("Burnpur Works") && <Bar dataKey="Burnpur" fill="hsl(45 95% 58%)" radius={[0, 3, 3, 0]} barSize={14} />}
-                  {driverTabLocations.includes("Durgapur Steel") && <Bar dataKey="Durgapur" fill="hsl(270 60% 60%)" radius={[0, 3, 3, 0]} barSize={14} />}
-                </BarChart>
-              </ResponsiveContainer>
+            {/* Individual driver cards with bar chart + details */}
+            <div className="space-y-3">
+              {filteredDriverData.map((row) => {
+                const driverMeta: Record<string, { scope: string; deltaActivity: string; deltaCO2: number }> = {
+                  "Coke Rate": { scope: "Scope 1", deltaActivity: "+12 t coke", deltaCO2: 185 },
+                  "PCI Rate": { scope: "Scope 1", deltaActivity: "+6 t PCI coal", deltaCO2: 125 },
+                  "Scrap Ratio": { scope: "Scope 1 & 3", deltaActivity: "-8 t scrap", deltaCO2: -45 },
+                  "Power Mix": { scope: "Scope 2", deltaActivity: "+8,200 kWh grid", deltaCO2: 142 },
+                  "BFG Recovery": { scope: "Scope 1", deltaActivity: "+3,500 m³ recovered", deltaCO2: -78 },
+                  "Sinter Ratio": { scope: "Scope 1", deltaActivity: "+5% sinter share", deltaCO2: -62 },
+                  "Slag Rate": { scope: "Scope 1", deltaActivity: "+15 kg/tHM", deltaCO2: 48 },
+                  "Pellet Ratio": { scope: "Scope 1 & 3", deltaActivity: "+3% pellet share", deltaCO2: -35 },
+                  "COG Recovery": { scope: "Scope 1", deltaActivity: "+1,200 m³ recovered", deltaCO2: -52 },
+                  "Limestone": { scope: "Scope 3", deltaActivity: "+15 t limestone", deltaCO2: 62 },
+                };
+                const meta = driverMeta[row.driver] || { scope: "Scope 1", deltaActivity: "—", deltaCO2: 0 };
+                const chartData = [
+                  ...(driverTabLocations.includes("Rourkela Works") ? [{ name: "Rourkela", value: row.Rourkela, fill: "hsl(168 70% 50%)" }] : []),
+                  ...(driverTabLocations.includes("Burnpur Works") ? [{ name: "Burnpur", value: row.Burnpur, fill: "hsl(45 95% 58%)" }] : []),
+                  ...(driverTabLocations.includes("Durgapur Steel") ? [{ name: "Durgapur", value: row.Durgapur, fill: "hsl(270 60% 60%)" }] : []),
+                ];
+                return (
+                  <div key={row.driver} className="border border-border rounded-lg p-3 hover:border-primary/30 transition-colors">
+                    <div className="flex items-start gap-4">
+                      {/* Left: chart */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold mb-1">{row.driver}</p>
+                        <ResponsiveContainer width="100%" height={chartData.length * 28 + 12}>
+                          <BarChart data={chartData} layout="vertical" barGap={2}>
+                            <XAxis type="number" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} hide />
+                            <YAxis dataKey="name" type="category" width={60} tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} />
+                            <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11 }} />
+                            <Bar dataKey="value" radius={[0, 3, 3, 0]} barSize={14}>
+                              {chartData.map((entry, idx) => (
+                                <Cell key={idx} fill={entry.fill} />
+                              ))}
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                      {/* Right: details */}
+                      <div className="shrink-0 w-44 space-y-1.5 pt-1">
+                        <div className="flex items-center gap-1.5">
+                          <Badge variant="secondary" className="text-[9px]">{meta.scope}</Badge>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-muted-foreground">Δ Activity</p>
+                          <p className="text-xs font-medium">{meta.deltaActivity}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-muted-foreground">Δ tCO₂e</p>
+                          <p className={`text-xs font-bold ${meta.deltaCO2 > 0 ? "text-red-400" : "text-emerald-400"}`}>
+                            {meta.deltaCO2 > 0 ? "+" : ""}{meta.deltaCO2} tCO₂e/day
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
-            {/* Best practices */}
-            <div className="border border-border rounded-lg p-3">
-              <p className="text-xs font-medium mb-2 flex items-center gap-1.5">
-                <TrendingUp className="w-3.5 h-3.5 text-primary" />
-                Cross-Location Insights
-              </p>
-              <div className="space-y-2">
-                {[
-                  { insight: "Burnpur's PCI Rate (158 kg/tHM) is 11% higher than Rourkela — replicate injection strategy to save ~320 tCO₂e/day", tag: "Best Practice" },
-                  { insight: "Durgapur's BFG Recovery (85%) lags peers by 5-7% — upgrade gas holder controls for ~180 tCO₂e/day reduction", tag: "Quick Win" },
-                  { insight: "Rourkela's Scrap Ratio (18%) is mid-range — increasing to Burnpur's 22% could cut BOF emissions by ~240 tCO₂e/day", tag: "Opportunity" },
-                ].map((item, i) => (
-                  <div key={i} className="flex gap-2 items-start">
-                    <Badge variant="outline" className="text-[10px] shrink-0 mt-0.5">{item.tag}</Badge>
-                    <p className="text-[11px] text-muted-foreground">{item.insight}</p>
-                  </div>
-                ))}
+            {/* sentra.AI Recommendations */}
+            <div className="border border-border rounded-lg overflow-hidden">
+              <div className="p-3 bg-secondary/30 border-b border-border flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <p className="text-xs font-semibold">sentra.AI Recommendations</p>
+                <Badge variant="secondary" className="text-[9px] ml-auto">
+                  {driverTabDrivers.length} drivers analyzed
+                </Badge>
+              </div>
+              <div className="divide-y divide-border/50">
+                {(() => {
+                  const driverRecs: { driver: string; status: "critical" | "warning" | "on-track"; recommendation: string; impact: string; current: string; target: string }[] = [
+                    { driver: "Coke Rate", status: "critical", recommendation: "Reduce coke rate by optimizing burden distribution and increasing PCI to 160 kg/tHM", impact: "-520 tCO₂e/day", current: "385 kg/tHM", target: "365 kg/tHM" },
+                    { driver: "PCI Rate", status: "on-track", recommendation: "Maintain PCI injection above 155 kg/tHM — consider grinding fineness upgrade for +5% combustibility", impact: "-125 tCO₂e/day", current: "142 kg/tHM", target: "160 kg/tHM" },
+                    { driver: "Scrap Ratio", status: "warning", recommendation: "Increase BOF scrap ratio to 24% with pre-heating using waste gas", impact: "-280 tCO₂e/day", current: "18%", target: "24%" },
+                    { driver: "Power Mix", status: "critical", recommendation: "Sign 50 MW solar PPA to raise RE share to 30%, dropping blended grid factor by 30%", impact: "-420 tCO₂e/day", current: "12%", target: "30%" },
+                    { driver: "BFG Recovery", status: "warning", recommendation: "Upgrade gas holder pressure controls — 6 flaring events lost ~15,000 m³ BFG last month", impact: "-340 tCO₂e/day", current: "88%", target: "94%" },
+                    { driver: "Sinter Ratio", status: "on-track", recommendation: "Sinter ratio within target range — monitor strand #3 for consistency", impact: "-60 tCO₂e/day", current: "78%", target: "82%" },
+                    { driver: "Slag Rate", status: "warning", recommendation: "Reduce slag rate by improving burden chemistry — target lower alumina in iron ore", impact: "-95 tCO₂e/day", current: "320 kg/tHM", target: "298 kg/tHM" },
+                    { driver: "Pellet Ratio", status: "on-track", recommendation: "Pellet ratio trending well — maintain current sourcing strategy", impact: "-40 tCO₂e/day", current: "25%", target: "30%" },
+                    { driver: "COG Recovery", status: "warning", recommendation: "Route surplus COG to DRI or power gen instead of flaring during low-demand periods", impact: "-210 tCO₂e/day", current: "82%", target: "95%" },
+                    { driver: "Limestone", status: "on-track", recommendation: "Limestone consumption stable — optimize sinter basicity to further reduce by 8%", impact: "-45 tCO₂e/day", current: "85 kg/tHM", target: "78 kg/tHM" },
+                  ];
+                  const statusCfg = {
+                    critical: { label: "Critical", color: "text-red-400", bg: "bg-red-400/10", icon: <AlertTriangle className="w-3 h-3" /> },
+                    warning: { label: "Attention", color: "text-amber-400", bg: "bg-amber-400/10", icon: <AlertTriangle className="w-3 h-3" /> },
+                    "on-track": { label: "On Track", color: "text-emerald-400", bg: "bg-emerald-400/10", icon: <CheckCircle className="w-3 h-3" /> },
+                  };
+                  return driverRecs
+                    .filter((r) => driverTabDrivers.includes(r.driver))
+                    .map((rec) => {
+                      const cfg = statusCfg[rec.status];
+                      return (
+                        <div key={rec.driver} className="p-3 flex items-center gap-3">
+                          <div className={`p-1.5 rounded ${cfg.bg} ${cfg.color} shrink-0`}>{cfg.icon}</div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-semibold">{rec.driver}</span>
+                              <Badge variant="outline" className={`text-[9px] ${cfg.color}`}>
+                                {cfg.label}
+                              </Badge>
+                            </div>
+                            <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{rec.recommendation}</p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className="text-xs font-mono">
+                              <span className="text-muted-foreground">{rec.current}</span>
+                              <span className="mx-1.5 text-muted-foreground">→</span>
+                              <span className="text-emerald-400 font-semibold">{rec.target}</span>
+                            </p>
+                            <p className="text-[10px] text-emerald-400 flex items-center justify-end gap-0.5 mt-0.5">
+                              <TrendingDown className="w-3 h-3" />
+                              {rec.impact}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    });
+                })()}
               </div>
             </div>
           </div>
