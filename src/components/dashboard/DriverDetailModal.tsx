@@ -27,11 +27,11 @@ const DriverDetailModal = ({ driver, shop, onClose }: DriverDetailModalProps) =>
   ];
 
   const historicalData = [
-    { period: "FY 24", value: "0.39" },
-    { period: "FY 25", value: "0.41" },
-    { period: "FY 26 A", value: "0.42" },
-    { period: "FY 26 B", value: "0.40" },
-    { period: "Prev Mo", value: "0.43" },
+    { period: "FY 24", cons: "16.8 t", spCons: "0.39 t/t" },
+    { period: "FY 25", cons: "17.5 t", spCons: "0.41 t/t" },
+    { period: "FY 26 A", cons: "18.0 t", spCons: "0.42 t/t" },
+    { period: "FY 26 B", cons: "17.2 t", spCons: "0.40 t/t" },
+    { period: "Prev Mo", cons: "18.6 t", spCons: "0.43 t/t" },
   ];
 
   const flags = [
@@ -98,8 +98,11 @@ const DriverDetailModal = ({ driver, shop, onClose }: DriverDetailModalProps) =>
         <div className="grid grid-cols-5 gap-1.5 mb-4">
           {historicalData.map((h) => (
             <div key={h.period} className="bg-secondary rounded-lg p-2 text-center">
-              <p className="text-[9px] text-muted-foreground">{h.period}</p>
-              <p className="text-xs font-semibold text-foreground font-mono">{h.value}</p>
+              <p className="text-[9px] text-muted-foreground font-medium mb-1">{h.period}</p>
+              <p className="text-[9px] text-muted-foreground">Cons.</p>
+              <p className="text-[10px] font-semibold text-foreground font-mono">{h.cons}</p>
+              <p className="text-[9px] text-muted-foreground mt-1">Sp. Cons</p>
+              <p className="text-[10px] font-semibold text-foreground font-mono">{h.spCons}</p>
             </div>
           ))}
         </div>
