@@ -60,16 +60,15 @@ Deno.serve(async (req) => {
         console.log("First row values:", JSON.stringify(rawRows[0]));
       }
 
-      // Helper to find a column value by trying multiple name variants
+      // Helper to find a column value by trying multiple name variants (handles spaces in Excel headers)
       const getVal = (row: any, ...names: string[]): any => {
-        for (const n of names) {
-          if (row[n] !== undefined && row[n] !== null) return row[n];
-        }
-        // Also try case-insensitive
         const rowKeys = Object.keys(row);
         for (const n of names) {
-          const found = rowKeys.find(k => k.toLowerCase() === n.toLowerCase());
-          if (found && row[found] !== undefined) return row[found];
+          // Exact match
+          if (row[n] !== undefined && row[n] !== null) return row[n];
+          // Try trimmed + case-insensitive match
+          const found = rowKeys.find(k => k.trim().toLowerCase() === n.trim().toLowerCase());
+          if (found && row[found] !== undefined && row[found] !== null) return row[found];
         }
         return null;
       };
