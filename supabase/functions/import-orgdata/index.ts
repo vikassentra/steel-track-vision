@@ -11,7 +11,7 @@ function parseTimestamp(raw: string): string {
   if (!raw) return "2023-01-01";
   const parts = raw.split(" ")[0].split("/");
   if (parts.length === 3) {
-    const [dd, mm, yyyy] = parts;
+    const [mm, dd, yyyy] = parts;
     return `${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}`;
   }
   return raw.substring(0, 10);
