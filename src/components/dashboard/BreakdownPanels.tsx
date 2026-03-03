@@ -65,8 +65,8 @@ const BreakdownPanels = ({ onShopClick, onScopeClick, onDriverClick, activeScope
             <ComposedChart data={shopBreakdowns} onClick={(e: any) => e?.activeLabel && onShopClick(e.activeLabel)}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 18%)" />
               <XAxis dataKey="shop" tick={{ fontSize: 9, fill: "hsl(215 15% 55%)" }} angle={-20} textAnchor="end" height={50} />
-              <YAxis yAxisId="left" tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }} />
-              <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10, fill: "hsl(var(--chart-5))" }} tickFormatter={(v: number) => v.toFixed(1)} />
+              <YAxis yAxisId="left" tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }} hide />
+              <YAxis yAxisId="right" orientation="left" tick={{ fontSize: 10, fill: "hsl(var(--chart-5))" }} tickFormatter={(v: number) => v.toFixed(2)} label={{ value: "tCO₂e/t", angle: -90, position: "insideLeft", style: { fontSize: 10, fill: "hsl(215 15% 55%)" } }} />
               <Tooltip content={<ShopTooltip unitMode={unitMode} />} />
               <Legend wrapperStyle={{ fontSize: 10 }} formatter={(value: string) => {
                 const labels: Record<string, string> = { scope1: "Scope 1", scope2: "Scope 2", scope3: "Scope 3", intensity: "Intensity (tCO₂e/t)" };
