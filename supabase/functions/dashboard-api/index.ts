@@ -81,13 +81,10 @@ Deno.serve(async (req) => {
   try {
     switch (action) {
       case "kpis": {
-        if (fromDate || toDate) {
-          const emData = await fetchEmissions(
-            "scope_name, co2e_value, is_to_be_subtracted, activity_data_value, is_product"
-          );
-
+        // Helper to aggregate KPI values from emissions rows
+        const aggregateKpis = (rows: any[]) => {
           let s1 = 0, s2 = 0, s3 = 0, s3m = 0, prod = 0;
-          emData.forEach((row: any) => {
+          rows.forEach((row: any) => {
             const val = Number(row.co2e_value) * (row.is_to_be_subtracted === 1 ? -1 : 1);
             if (row.scope_name === "Scope 1") s1 += val;
             else if (row.scope_name === "Scope 2") s2 += val;
@@ -95,23 +92,75 @@ Deno.serve(async (req) => {
             else if (row.scope_name === "Scope 3") s3 += val;
             if (row.is_product === 1) prod += Number(row.activity_data_value);
           });
-
           const total = s1 + s2 + s3 + s3m;
           const production = prod > 0 ? prod : 5000000;
           const intensity = production > 0 ? total / production : 0;
+          return { s1, s2, s3, s3m, total, production, intensity };
+        };
 
-          const kpiMap: Record<string, { value: number; unit: string }> = {
-            total_emissions: { value: Math.round(total), unit: "tCO2e" },
-            production: { value: Math.round(production), unit: "tonnes" },
-            intensity: { value: +intensity.toFixed(3), unit: "tCO2e/t" },
-            intensity_s1: { value: +(s1 / production).toFixed(3), unit: "tCO2e/t" },
-            intensity_s2: { value: +(s2 / production).toFixed(3), unit: "tCO2e/t" },
-            intensity_s3: { value: +(s3 / production).toFixed(3), unit: "tCO2e/t" },
-            intensity_s3_mining: { value: +(s3m / production).toFixed(3), unit: "tCO2e/t" },
-            coke_rate: { value: 554, unit: "kg/thm" },
-            renewables: { value: 8.0, unit: "%" },
-            scrap_rate: { value: 16.9, unit: "%" },
-            bfg_recovery: { value: 0.838, unit: "kNm3/thm" },
+        const pctDelta = (curr: number, prev: number) =>
+          prev === 0 ? 0 : +( ((curr - prev) / Math.abs(prev)) * 100 ).toFixed(1);
+
+        const selectCols = "scope_name, co2e_value, is_to_be_subtracted, activity_data_value, is_product, timestamp";
+
+        if (fromDate || toDate) {
+          // Current period
+          const emData = await fetchEmissions(
+            selectCols
+          );
+          const curr = aggregateKpis(emData);
+
+          // Compute previous period of equal length
+          const fDate = fromDate || toDate!;
+          const tDate = toDate || fromDate!;
+          const [fy, fm] = fDate.split("-").map(Number);
+          const [ty, tm] = tDate.split("-").map(Number);
+          const monthSpan = (ty - fy) * 12 + (tm - fm) + 1;
+          // Shift back by monthSpan months
+          const prevToMonth = fm - 1 <= 0 ? 12 + (fm - 1) : fm - 1;
+          const prevToYear = fm - 1 <= 0 ? fy - 1 : fy;
+          const prevFromMonth = prevToMonth - monthSpan + 1 <= 0
+            ? prevToMonth - monthSpan + 1 + 12
+            : prevToMonth - monthSpan + 1;
+          const prevFromYear = prevToMonth - monthSpan + 1 <= 0
+            ? prevToYear - 1
+            : prevToYear;
+          const prevFrom = `${prevFromYear}-${String(prevFromMonth).padStart(2, "0")}`;
+          const prevTo = `${prevToYear}-${String(prevToMonth).padStart(2, "0")}`;
+
+          // Fetch previous period data
+          const PAGE_SIZE = 1000;
+          let prevData: any[] = [];
+          let pFrom = 0;
+          while (true) {
+            let q = supabase
+              .from("emissions_data")
+              .select(selectCols)
+              .eq("is_accepted", 1)
+              .gte("timestamp", `${prevFrom}-01`)
+              .lte("timestamp", endOfMonth(prevTo))
+              .range(pFrom, pFrom + PAGE_SIZE - 1);
+            const { data: d, error: e } = await q;
+            if (e) throw e;
+            if (!d || d.length === 0) break;
+            prevData = prevData.concat(d);
+            if (d.length < PAGE_SIZE) break;
+            pFrom += PAGE_SIZE;
+          }
+          const prev = aggregateKpis(prevData);
+
+          const kpiMap: Record<string, { value: number; unit: string; delta: number }> = {
+            total_emissions: { value: Math.round(curr.total), unit: "tCO2e", delta: pctDelta(curr.total, prev.total) },
+            production: { value: Math.round(curr.production), unit: "tonnes", delta: pctDelta(curr.production, prev.production) },
+            intensity: { value: +curr.intensity.toFixed(3), unit: "tCO2e/t", delta: pctDelta(curr.intensity, prev.intensity) },
+            intensity_s1: { value: +(curr.s1 / curr.production).toFixed(3), unit: "tCO2e/t", delta: pctDelta(curr.s1 / curr.production, prev.s1 / prev.production) },
+            intensity_s2: { value: +(curr.s2 / curr.production).toFixed(3), unit: "tCO2e/t", delta: pctDelta(curr.s2 / curr.production, prev.s2 / prev.production) },
+            intensity_s3: { value: +(curr.s3 / curr.production).toFixed(3), unit: "tCO2e/t", delta: pctDelta(curr.s3 / curr.production, prev.s3 / prev.production) },
+            intensity_s3_mining: { value: +(curr.s3m / curr.production).toFixed(3), unit: "tCO2e/t", delta: pctDelta(curr.s3m / curr.production, prev.s3m / prev.production) },
+            coke_rate: { value: 554, unit: "kg/thm", delta: 0 },
+            renewables: { value: 8.0, unit: "%", delta: 0 },
+            scrap_rate: { value: 16.9, unit: "%", delta: 0 },
+            bfg_recovery: { value: 0.838, unit: "kNm3/thm", delta: 0 },
           };
 
           return new Response(JSON.stringify(kpiMap), {
@@ -119,12 +168,36 @@ Deno.serve(async (req) => {
           });
         }
 
-        const { data, error } = await supabase.from("kpi_values").select("*");
-        if (error) throw error;
-        const kpiMap: Record<string, { value: number; unit: string }> = {};
-        data.forEach((row: any) => {
-          kpiMap[row.metric_name] = { value: row.value, unit: row.unit };
+        // No date filter: compute from all data, grouped by month, compare last two months
+        const allData = await fetchEmissions(selectCols);
+        // Group by month
+        const monthMap = new Map<string, any[]>();
+        allData.forEach((row: any) => {
+          const m = row.timestamp.substring(0, 7);
+          if (!monthMap.has(m)) monthMap.set(m, []);
+          monthMap.get(m)!.push(row);
         });
+        const months = Array.from(monthMap.keys()).sort();
+        const currMonth = months.length > 0 ? months[months.length - 1] : null;
+        const prevMonth = months.length > 1 ? months[months.length - 2] : null;
+
+        const curr = aggregateKpis(currMonth ? monthMap.get(currMonth)! : []);
+        const prev = aggregateKpis(prevMonth ? monthMap.get(prevMonth)! : []);
+
+        const kpiMap: Record<string, { value: number; unit: string; delta: number }> = {
+          total_emissions: { value: Math.round(curr.total), unit: "tCO2e", delta: pctDelta(curr.total, prev.total) },
+          production: { value: Math.round(curr.production), unit: "tonnes", delta: pctDelta(curr.production, prev.production) },
+          intensity: { value: +curr.intensity.toFixed(3), unit: "tCO2e/t", delta: pctDelta(curr.intensity, prev.intensity) },
+          intensity_s1: { value: +(curr.s1 / curr.production).toFixed(3), unit: "tCO2e/t", delta: pctDelta(curr.s1 / curr.production, prev.s1 / prev.production) },
+          intensity_s2: { value: +(curr.s2 / curr.production).toFixed(3), unit: "tCO2e/t", delta: pctDelta(curr.s2 / curr.production, prev.s2 / prev.production) },
+          intensity_s3: { value: +(curr.s3 / curr.production).toFixed(3), unit: "tCO2e/t", delta: pctDelta(curr.s3 / curr.production, prev.s3 / prev.production) },
+          intensity_s3_mining: { value: +(curr.s3m / curr.production).toFixed(3), unit: "tCO2e/t", delta: pctDelta(curr.s3m / curr.production, prev.s3m / prev.production) },
+          coke_rate: { value: 554, unit: "kg/thm", delta: 0 },
+          renewables: { value: 8.0, unit: "%", delta: 0 },
+          scrap_rate: { value: 16.9, unit: "%", delta: 0 },
+          bfg_recovery: { value: 0.838, unit: "kNm3/thm", delta: 0 },
+        };
+
         return new Response(JSON.stringify(kpiMap), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });

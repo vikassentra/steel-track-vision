@@ -16,17 +16,17 @@ const fetchDashboard = async (action: string, from?: string, to?: string) => {
 };
 
 export interface KPIData {
-  total_emissions: { value: number; unit: string };
-  production: { value: number; unit: string };
-  intensity: { value: number; unit: string };
-  intensity_s1: { value: number; unit: string };
-  intensity_s2: { value: number; unit: string };
-  intensity_s3: { value: number; unit: string };
-  intensity_s3_mining: { value: number; unit: string };
-  coke_rate: { value: number; unit: string };
-  renewables: { value: number; unit: string };
-  scrap_rate: { value: number; unit: string };
-  bfg_recovery: { value: number; unit: string };
+  total_emissions: { value: number; unit: string; delta?: number };
+  production: { value: number; unit: string; delta?: number };
+  intensity: { value: number; unit: string; delta?: number };
+  intensity_s1: { value: number; unit: string; delta?: number };
+  intensity_s2: { value: number; unit: string; delta?: number };
+  intensity_s3: { value: number; unit: string; delta?: number };
+  intensity_s3_mining: { value: number; unit: string; delta?: number };
+  coke_rate: { value: number; unit: string; delta?: number };
+  renewables: { value: number; unit: string; delta?: number };
+  scrap_rate: { value: number; unit: string; delta?: number };
+  bfg_recovery: { value: number; unit: string; delta?: number };
 }
 
 export interface TrendPoint {

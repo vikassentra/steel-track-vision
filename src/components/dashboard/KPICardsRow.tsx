@@ -109,16 +109,16 @@ const KPICardsRow = ({ onKPIClick, unitMode, frequency, activePlant, onMetricCli
   ];
 
   const mainCards: (KPICardProps & {scopeBreakdown?: {label: string;value: string;unit: string;}[];})[] = [
-    { title: "Total Emissions", value: formatNum(totalEmissions), unit: absU, delta: 3.4, deltaLabel: dl },
-    { title: "Production", value: formatNum(production), unit: "tonnes", delta: 2.1, deltaLabel: dl },
-    { title: "Intensity", value: intensity.toFixed(3), unit: iU, delta: 1.8, deltaLabel: dl, scopeBreakdown: intensityScopeBreakdown },
+    { title: "Total Emissions", value: formatNum(totalEmissions), unit: absU, delta: kpis.total_emissions?.delta ?? 0, deltaLabel: dl },
+    { title: "Production", value: formatNum(production), unit: "tonnes", delta: kpis.production?.delta ?? 0, deltaLabel: dl },
+    { title: "Intensity", value: intensity.toFixed(3), unit: iU, delta: kpis.intensity?.delta ?? 0, deltaLabel: dl, scopeBreakdown: intensityScopeBreakdown },
   ];
 
   const paramCards: (KPICardProps & {scopeBreakdown?: {label: string;value: string;unit: string;}[];})[] = [
-    { title: "Coke Rate", value: String(Math.round(kpis.coke_rate?.value ?? 0)), unit: "kg/thm", delta: 2.4, deltaLabel: dl },
-    { title: "Renewable Elec.", value: (kpis.renewables?.value ?? 0).toFixed(1), unit: "%", delta: -3.1, deltaLabel: dl },
-    { title: "Scrap Rate", value: (kpis.scrap_rate?.value ?? 0).toFixed(1), unit: "%", delta: -1.5, deltaLabel: dl },
-    { title: "BFG Recovery", value: (kpis.bfg_recovery?.value ?? 0).toFixed(3), unit: "kNm3/thm", delta: -0.8, deltaLabel: dl },
+    { title: "Coke Rate", value: String(Math.round(kpis.coke_rate?.value ?? 0)), unit: "kg/thm", delta: kpis.coke_rate?.delta ?? 0, deltaLabel: dl },
+    { title: "Renewable Elec.", value: (kpis.renewables?.value ?? 0).toFixed(1), unit: "%", delta: kpis.renewables?.delta ?? 0, deltaLabel: dl },
+    { title: "Scrap Rate", value: (kpis.scrap_rate?.value ?? 0).toFixed(1), unit: "%", delta: kpis.scrap_rate?.delta ?? 0, deltaLabel: dl },
+    { title: "BFG Recovery", value: (kpis.bfg_recovery?.value ?? 0).toFixed(3), unit: "kNm3/thm", delta: kpis.bfg_recovery?.delta ?? 0, deltaLabel: dl },
   ];
 
   const handleParamClick = (card: typeof paramCards[0]) => {
