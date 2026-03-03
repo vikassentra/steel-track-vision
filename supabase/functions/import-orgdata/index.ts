@@ -54,26 +54,50 @@ Deno.serve(async (req) => {
       }
       const rawRows: any[] = XLSX.utils.sheet_to_json(ws);
       console.log(`Parsed ${rawRows.length} rows from sheet "${sheetName}"`);
+      if (rawRows.length > 0) {
+        const keys = Object.keys(rawRows[0]);
+        console.log("Column names:", JSON.stringify(keys));
+        console.log("First row values:", JSON.stringify(rawRows[0]));
+      }
+
+      // Helper to find a column value by trying multiple name variants
+      const getVal = (row: any, ...names: string[]): any => {
+        for (const n of names) {
+          if (row[n] !== undefined && row[n] !== null) return row[n];
+        }
+        // Also try case-insensitive
+        const rowKeys = Object.keys(row);
+        for (const n of names) {
+          const found = rowKeys.find(k => k.toLowerCase() === n.toLowerCase());
+          if (found && row[found] !== undefined) return row[found];
+        }
+        return null;
+      };
 
       // Map Excel columns to DB columns
       rows = rawRows.map((r: any) => ({
-        driver_name: r["ScopeDriverName"] || "Unknown",
-        scope_category_name: r["ScopeCategoryName"] || "",
-        scope_name: r["ScopeName"] || "",
-        plant_name: r["LevelGOrgPlantName"] || "",
-        facility_name: r["LevelFOrgFacilityName"] || "",
-        activity_data_value: cleanNumber(r["ActivityDataValue"]),
-        timestamp: parseTimestamp(r["Timestamp"] || ""),
-        co2e_value: cleanNumber(r["CO2e_Value"]),
-        is_product: cleanNumber(r["IsProduct"]),
-        is_to_be_subtracted: cleanNumber(r["IsToBeSubstracted"]),
-        is_accepted: cleanNumber(r["IsAccepted"]),
-        emission_factor: cleanNumber(r["EmissionFactor"]),
-        ef_unit: r["EF_Unit"] || null,
-        ef_source: r["EF_Source"] || null,
-        user_type: r["UserType"] || null,
-        source: r["Source"] || null,
+        driver_name: getVal(r, "ScopeDriverName", "Scope Driver Name", "DriverName") || "Unknown",
+        scope_category_name: getVal(r, "ScopeCategoryName", "Scope Category Name") || "",
+        scope_name: getVal(r, "ScopeName", "Scope Name") || "",
+        plant_name: getVal(r, "LevelGOrgPlantName", "Level G Org Plant Name", "PlantName") || "",
+        facility_name: getVal(r, "LevelFOrgFacilityName", "Level F Org Facility Name", "FacilityName") || "",
+        activity_data_value: cleanNumber(getVal(r, "ActivityDataValue", "Activity Data Value")),
+        timestamp: parseTimestamp(getVal(r, "Timestamp", "timestamp") || ""),
+        co2e_value: cleanNumber(getVal(r, "CO2e_Value", "CO2eValue", "CO2e Value", "CO2e_value")),
+        is_product: cleanNumber(getVal(r, "IsProduct", "Is Product")),
+        is_to_be_subtracted: cleanNumber(getVal(r, "IsToBeSubstracted", "IsToBeSubtracted", "Is To Be Subtracted")),
+        is_accepted: cleanNumber(getVal(r, "IsAccepted", "Is Accepted")),
+        emission_factor: cleanNumber(getVal(r, "EmissionFactor", "Emission Factor")),
+        ef_unit: getVal(r, "EF_Unit", "EF Unit", "EFUnit") || null,
+        ef_source: getVal(r, "EF_Source", "EF Source", "EFSource") || null,
+        user_type: getVal(r, "UserType", "User Type") || null,
+        source: getVal(r, "Source", "source") || null,
       }));
+
+      // Log a sample mapped row
+      if (rows.length > 0) {
+        console.log("First mapped row:", JSON.stringify(rows[0]));
+      }
     } else if (body.rows && Array.isArray(body.rows)) {
       rows = body.rows;
     } else {
