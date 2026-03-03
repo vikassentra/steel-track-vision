@@ -44,6 +44,11 @@ export interface ShopBreakdownItem {
   scope3Mining: number;
   total: number;
   intensity: number;
+  production: number;
+  s1Intensity: number;
+  s2Intensity: number;
+  s3Intensity: number;
+  s3MiningIntensity: number;
 }
 
 export interface DriverItem {

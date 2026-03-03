@@ -97,6 +97,11 @@ Deno.serve(async (req) => {
           scope3Mining: Math.round(Number(row.s3_mining_emissions)),
           total: Math.round(Number(row.total_emissions)),
           intensity: +Number(row.intensity).toFixed(4),
+          production: Math.round(Number(row.production)),
+          s1Intensity: +Number(row.s1_intensity).toFixed(3),
+          s2Intensity: +Number(row.s2_intensity).toFixed(3),
+          s3Intensity: +Number(row.s3_intensity).toFixed(3),
+          s3MiningIntensity: +Number(row.s3_mining_intensity).toFixed(3),
         }));
 
         return new Response(JSON.stringify(shops), {
