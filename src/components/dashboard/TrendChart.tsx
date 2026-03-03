@@ -1,4 +1,4 @@
-import { dailyEmissions } from "@/data/mockData";
+import { useTrend } from "@/hooks/useDashboardData";
 import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from "recharts";
@@ -32,11 +32,21 @@ const CustomTooltip = ({ active, payload, label, unitMode }: any) => {
 };
 
 const TrendChart = ({ onPointClick, unitMode, frequency }: TrendChartProps) => {
-  const data = dailyEmissions.map((d) => ({
-    ...d,
-    date: d.date.slice(5),
-  }));
+  const { data: trendData, isLoading } = useTrend();
   const periodLabel = frequency === "Daily" ? "day" : "month";
+
+  if (isLoading || !trendData) {
+    return (
+      <div className="bg-card border-y border-border px-4 py-5">
+        <div className="animate-pulse h-[320px] bg-muted/20 rounded" />
+      </div>
+    );
+  }
+
+  const data = trendData.map((d) => ({
+    ...d,
+    date: d.date, // Already in YYYY-MM format
+  }));
 
   return (
     <div className="bg-card border-y border-border px-4 py-5">
