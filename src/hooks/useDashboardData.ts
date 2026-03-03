@@ -76,8 +76,8 @@ export interface BenchmarkItem {
 
 const queryDefaults = { staleTime: 5 * 60 * 1000, retry: 3, retryDelay: (attempt: number) => Math.min(1000 * 2 ** attempt, 10000) };
 
-export const useKPIs = () =>
-  useQuery<KPIData>({ queryKey: ["dashboard", "kpis"], queryFn: () => fetchDashboard("kpis"), ...queryDefaults });
+export const useKPIs = (from?: string, to?: string) =>
+  useQuery<KPIData>({ queryKey: ["dashboard", "kpis", from, to], queryFn: () => fetchDashboard("kpis", from, to), ...queryDefaults });
 
 export const useTrend = (from?: string, to?: string) =>
   useQuery<TrendPoint[]>({ queryKey: ["dashboard", "trend", from, to], queryFn: () => fetchDashboard("trend", from, to), ...queryDefaults });

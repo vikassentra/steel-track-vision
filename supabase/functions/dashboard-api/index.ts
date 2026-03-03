@@ -31,6 +31,51 @@ Deno.serve(async (req) => {
   try {
     switch (action) {
       case "kpis": {
+        // If date filters provided, compute KPIs dynamically from emissions_data
+        if (fromDate || toDate) {
+          let q = supabase
+            .from("emissions_data")
+            .select("scope_name, co2e_value, is_to_be_subtracted, activity_data_value, is_product")
+            .eq("is_accepted", 1);
+          if (fromDate) q = q.gte("timestamp", `${fromDate}-01`);
+          if (toDate) q = q.lte("timestamp", endOfMonth(toDate));
+          const { data: emData, error: emError } = await q;
+          if (emError) throw emError;
+
+          let s1 = 0, s2 = 0, s3 = 0, s3m = 0, prod = 0;
+          (emData ?? []).forEach((row: any) => {
+            const val = Number(row.co2e_value) * (row.is_to_be_subtracted === 1 ? -1 : 1);
+            if (row.scope_name === "Scope 1") s1 += val;
+            else if (row.scope_name === "Scope 2") s2 += val;
+            else if (row.scope_name === "Scope 3 + mining") s3m += val;
+            else if (row.scope_name === "Scope 3") s3 += val;
+            if (row.is_product === 1) prod += Number(row.activity_data_value);
+          });
+
+          const total = s1 + s2 + s3 + s3m;
+          const production = prod > 0 ? prod : 5000000;
+          const intensity = production > 0 ? total / production : 0;
+
+          const kpiMap: Record<string, { value: number; unit: string }> = {
+            total_emissions: { value: Math.round(total), unit: "tCO2e" },
+            production: { value: Math.round(production), unit: "tonnes" },
+            intensity: { value: +intensity.toFixed(3), unit: "tCO2e/t" },
+            intensity_s1: { value: +(s1 / production).toFixed(3), unit: "tCO2e/t" },
+            intensity_s2: { value: +(s2 / production).toFixed(3), unit: "tCO2e/t" },
+            intensity_s3: { value: +(s3 / production).toFixed(3), unit: "tCO2e/t" },
+            intensity_s3_mining: { value: +(s3m / production).toFixed(3), unit: "tCO2e/t" },
+            coke_rate: { value: 554, unit: "kg/thm" },
+            renewables: { value: 8.0, unit: "%" },
+            scrap_rate: { value: 16.9, unit: "%" },
+            bfg_recovery: { value: 0.838, unit: "kNm3/thm" },
+          };
+
+          return new Response(JSON.stringify(kpiMap), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        // No date filters — use static kpi_values table
         const { data, error } = await supabase
           .from("kpi_values")
           .select("*");
