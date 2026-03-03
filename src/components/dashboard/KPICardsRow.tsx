@@ -95,15 +95,15 @@ const KPICardsRow = ({ onKPIClick, unitMode, frequency, activePlant, onMetricCli
   const intensity = plantData ? plantData.intensity : (kpis.intensity?.value ?? 0);
 
   const intensityScopeBreakdown = plantData ? [
-    { label: "S1", value: plantData.s1Intensity.toFixed(2), unit: iU },
-    { label: "S2", value: plantData.s2Intensity.toFixed(2), unit: iU },
-    { label: "S3", value: plantData.s3Intensity.toFixed(2), unit: iU },
-    { label: "S3+Mining", value: plantData.s3MiningIntensity.toFixed(2), unit: iU },
+    { label: "S1", value: plantData.s1Intensity.toFixed(3), unit: iU },
+    { label: "S2", value: plantData.s2Intensity.toFixed(3), unit: iU },
+    { label: "S3", value: plantData.s3Intensity.toFixed(3), unit: iU },
+    { label: "S3+Mining", value: plantData.s3MiningIntensity.toFixed(3), unit: iU },
   ] : [
-    { label: "S1", value: kpis.intensity_s1?.value?.toFixed(2) ?? "—", unit: iU },
-    { label: "S2", value: kpis.intensity_s2?.value?.toFixed(2) ?? "—", unit: iU },
-    { label: "S3", value: kpis.intensity_s3?.value?.toFixed(2) ?? "—", unit: iU },
-    { label: "S3+Mining", value: kpis.intensity_s3_mining?.value?.toFixed(2) ?? "—", unit: iU },
+    { label: "S1", value: kpis.intensity_s1?.value?.toFixed(3) ?? "—", unit: iU },
+    { label: "S2", value: kpis.intensity_s2?.value?.toFixed(3) ?? "—", unit: iU },
+    { label: "S3", value: kpis.intensity_s3?.value?.toFixed(3) ?? "—", unit: iU },
+    { label: "S3+Mining", value: kpis.intensity_s3_mining?.value?.toFixed(3) ?? "—", unit: iU },
   ];
 
   const mainCards: (KPICardProps & {scopeBreakdown?: {label: string;value: string;unit: string;}[];})[] = [
