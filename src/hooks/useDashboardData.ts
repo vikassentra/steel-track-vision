@@ -41,6 +41,7 @@ export interface ShopBreakdownItem {
   scope1: number;
   scope2: number;
   scope3: number;
+  scope3Mining: number;
   total: number;
   intensity: number;
 }

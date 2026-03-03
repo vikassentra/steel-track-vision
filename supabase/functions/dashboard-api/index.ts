@@ -89,17 +89,15 @@ Deno.serve(async (req) => {
           .order("total_emissions", { ascending: false });
         if (plantError) throw plantError;
 
-        const shops = (plantData ?? []).map((row: any) => {
-          const prod = Number(row.production);
-          return {
-            shop: row.plant_name,
-            scope1: Math.round(Number(row.s1_intensity) * prod),
-            scope2: Math.round(Number(row.s2_intensity) * prod),
-            scope3: Math.round((Number(row.s3_intensity) + Number(row.s3_mining_intensity)) * prod),
-            total: Math.round(Number(row.total_emissions)),
-            intensity: +Number(row.intensity).toFixed(4),
-          };
-        });
+        const shops = (plantData ?? []).map((row: any) => ({
+          shop: row.plant_name,
+          scope1: Math.round(Number(row.s1_emissions)),
+          scope2: Math.round(Number(row.s2_emissions)),
+          scope3: Math.round(Number(row.s3_emissions)),
+          scope3Mining: Math.round(Number(row.s3_mining_emissions)),
+          total: Math.round(Number(row.total_emissions)),
+          intensity: +Number(row.intensity).toFixed(4),
+        }));
 
         return new Response(JSON.stringify(shops), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
