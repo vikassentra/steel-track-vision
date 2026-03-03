@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { Calendar, X, ArrowRightLeft, Sparkles, ChevronDown } from "lucide-react";
+import { Calendar, X, ArrowRightLeft, Sparkles, ChevronDown, Download, FileText, Award, CalendarDays } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Calendar as CalendarPicker } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { format } from "date-fns";
 
 interface FilterBarProps {
   activeFilters: string[];
@@ -74,6 +76,81 @@ const MonthSelector = ({ value, onChange, label }: { value: string; onChange: (v
   </Popover>
 );
 
+const DownloadMenu = () => {
+  const [open, setOpen] = useState(false);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+
+  const handleDownload = (type: string, date?: Date) => {
+    console.log(`Downloading ${type}`, date ? format(date, "PPP") : "");
+    setOpen(false);
+    setDatePickerOpen(false);
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-secondary text-secondary-foreground rounded-md hover:bg-muted transition-colors font-medium">
+          <Download className="w-3.5 h-3.5" />
+          Download
+          <ChevronDown className="w-3 h-3 text-muted-foreground" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-56 p-1.5" align="end">
+        <div className="space-y-0.5">
+          <button
+            onClick={() => handleDownload("daily-summary")}
+            className="w-full flex items-center gap-2.5 px-3 py-2 text-xs rounded-md text-foreground hover:bg-muted transition-colors text-left"
+          >
+            <FileText className="w-4 h-4 text-primary" />
+            <div>
+              <div className="font-medium">Daily Summary</div>
+              <div className="text-[10px] text-muted-foreground">Download daily report</div>
+            </div>
+          </button>
+          <button
+            onClick={() => handleDownload("certificate")}
+            className="w-full flex items-center gap-2.5 px-3 py-2 text-xs rounded-md text-foreground hover:bg-muted transition-colors text-left"
+          >
+            <Award className="w-4 h-4 text-primary" />
+            <div>
+              <div className="font-medium">Certificate</div>
+              <div className="text-[10px] text-muted-foreground">Download emissions certificate</div>
+            </div>
+          </button>
+
+          <div className="border-t border-border my-1" />
+
+          <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+            <PopoverTrigger asChild>
+              <button className="w-full flex items-center gap-2.5 px-3 py-2 text-xs rounded-md text-foreground hover:bg-muted transition-colors text-left">
+                <CalendarDays className="w-4 h-4 text-primary" />
+                <div className="flex-1">
+                  <div className="font-medium">Select Date & Download</div>
+                  <div className="text-[10px] text-muted-foreground">
+                    {selectedDate ? format(selectedDate, "PPP") : "Pick a specific date"}
+                  </div>
+                </div>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end" side="left">
+              <CalendarPicker
+                mode="single"
+                selected={selectedDate}
+                onSelect={(date) => {
+                  setSelectedDate(date);
+                  if (date) handleDownload("custom-date", date);
+                }}
+                className="p-3 pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+};
+
 const FilterBar = ({
   activeFilters, onRemoveFilter, onOpenAnalytics, onOpenSentraAI,
   frequency, onFrequencyChange, fromMonth, toMonth, onFromMonthChange, onToMonthChange,
@@ -132,7 +209,7 @@ const FilterBar = ({
             ))}
           </div>
 
-          {/* From / To month selectors */}
+          <DownloadMenu />
           <div className="flex items-center gap-1">
             <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
             <MonthSelector value={fromMonth} onChange={onFromMonthChange} label="From" />
