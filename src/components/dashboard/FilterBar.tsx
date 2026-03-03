@@ -12,8 +12,6 @@ import { format } from "date-fns";
 interface FilterBarProps {
   activeFilters: string[];
   onRemoveFilter: (f: string) => void;
-  onOpenAnalytics: () => void;
-  onOpenSentraAI: () => void;
   frequency: "Monthly" | "Daily";
   onFrequencyChange: (f: "Monthly" | "Daily") => void;
   fromMonth: string;
@@ -87,10 +85,8 @@ const DownloadMenu = () => {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-secondary text-secondary-foreground rounded-md hover:bg-muted transition-colors font-medium">
-          <Download className="w-3.5 h-3.5" />
-          Download
-          <ChevronDown className="w-3 h-3 text-muted-foreground" />
+        <button className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors" title="Download">
+          <Download className="w-4 h-4" />
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-56 p-1.5" align="end">
@@ -122,7 +118,7 @@ const DownloadMenu = () => {
 };
 
 const FilterBar = ({
-  activeFilters, onRemoveFilter, onOpenAnalytics, onOpenSentraAI,
+  activeFilters, onRemoveFilter,
   frequency, onFrequencyChange, fromMonth, toMonth, onFromMonthChange, onToMonthChange,
 }: FilterBarProps) => {
   const [activeRegion, setActiveRegion] = useState(regions[0]);
@@ -146,23 +142,8 @@ const FilterBar = ({
             </button>
           ))}
         </div>
-        {/* Right: Analytics, AI, Frequency & Date */}
+        {/* Right: Frequency & Date */}
         <div className="flex items-center gap-2">
-          <button
-            onClick={onOpenAnalytics}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors font-medium"
-          >
-            <ArrowRightLeft className="w-3.5 h-3.5" />
-            Run Analytics
-          </button>
-          <button
-            onClick={onOpenSentraAI}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-accent text-accent-foreground rounded-md hover:bg-accent/80 transition-colors font-medium"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            sentra.AI
-          </button>
-
           {/* Frequency toggle */}
           <div className="flex bg-secondary rounded-md p-0.5">
             {(["Monthly", "Daily"] as const).map((f) => (
@@ -180,7 +161,6 @@ const FilterBar = ({
             ))}
           </div>
 
-          <DownloadMenu />
           <div className="flex items-center gap-1">
             <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
             <MonthSelector value={fromMonth} onChange={onFromMonthChange} label="From" />
@@ -210,6 +190,8 @@ const FilterBar = ({
               </PopoverContent>
             </Popover>
           )}
+
+          <DownloadMenu />
         </div>
       </div>
 

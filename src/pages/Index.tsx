@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ArrowRightLeft, Sparkles } from "lucide-react";
 import FilterBar from "@/components/dashboard/FilterBar";
 import KPICardsRow from "@/components/dashboard/KPICardsRow";
 import TrendChart from "@/components/dashboard/TrendChart";
@@ -60,8 +61,6 @@ const Index = () => {
       <FilterBar
         activeFilters={activeFilters}
         onRemoveFilter={handleRemoveFilter}
-        onOpenAnalytics={() => setAnalyticsOpen(true)}
-        onOpenSentraAI={() => setSentraAIOpen(true)}
         frequency={activeFrequency}
         onFrequencyChange={setActiveFrequency}
         fromMonth={fromMonth}
@@ -88,19 +87,35 @@ const Index = () => {
               </button>
             )}
           </div>
-          <div className="flex bg-secondary rounded-md p-0.5">
-            {(["emissions", "energy"] as const).map((mode) =>
+          <div className="flex items-center gap-2">
+            <div className="flex bg-secondary rounded-md p-0.5">
+              {(["emissions", "energy"] as const).map((mode) =>
+              <button
+                key={mode}
+                onClick={() => setUnitMode(mode)}
+                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+                unitMode === mode ?
+                "bg-accent text-accent-foreground" :
+                "text-muted-foreground hover:text-foreground"}`
+                }>
+                  {mode === "emissions" ? "Emissions" : "Energy"}
+                </button>
+              )}
+            </div>
             <button
-              key={mode}
-              onClick={() => setUnitMode(mode)}
-              className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
-              unitMode === mode ?
-              "bg-accent text-accent-foreground" :
-              "text-muted-foreground hover:text-foreground"}`
-              }>
-                {mode === "emissions" ? "Emissions" : "Energy"}
-              </button>
-            )}
+              onClick={() => setAnalyticsOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors font-medium"
+            >
+              <ArrowRightLeft className="w-3.5 h-3.5" />
+              Run Analytics
+            </button>
+            <button
+              onClick={() => setSentraAIOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-accent text-accent-foreground rounded-md hover:bg-accent/80 transition-colors font-medium"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              sentra.AI
+            </button>
           </div>
         </div>
 
