@@ -16,6 +16,13 @@ Deno.serve(async (req) => {
   const fromDate = url.searchParams.get("from"); // YYYY-MM format
   const toDate = url.searchParams.get("to");     // YYYY-MM format
 
+  // Compute last day of a YYYY-MM month
+  const endOfMonth = (ym: string) => {
+    const [y, m] = ym.split("-").map(Number);
+    const lastDay = new Date(y, m, 0).getDate();
+    return `${ym}-${String(lastDay).padStart(2, "0")}`;
+  };
+
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -45,7 +52,7 @@ Deno.serve(async (req) => {
           .eq("is_accepted", 1)
           .order("timestamp");
         if (fromDate) trendQuery = trendQuery.gte("timestamp", `${fromDate}-01`);
-        if (toDate) trendQuery = trendQuery.lte("timestamp", `${toDate}-31`);
+        if (toDate) trendQuery = trendQuery.lte("timestamp", endOfMonth(toDate));
         const { data, error } = await trendQuery;
         if (error) throw error;
 
@@ -94,7 +101,7 @@ Deno.serve(async (req) => {
             .select("plant_name, scope_name, co2e_value, is_to_be_subtracted, activity_data_value, is_product")
             .eq("is_accepted", 1);
           if (fromDate) sbQuery = sbQuery.gte("timestamp", `${fromDate}-01`);
-          if (toDate) sbQuery = sbQuery.lte("timestamp", `${toDate}-31`);
+          if (toDate) sbQuery = sbQuery.lte("timestamp", endOfMonth(toDate));
           const { data: emData, error: emError } = await sbQuery;
           if (emError) throw emError;
 
@@ -177,7 +184,7 @@ Deno.serve(async (req) => {
           driversQuery = driversQuery.eq("plant_name", plant);
         }
         if (fromDate) driversQuery = driversQuery.gte("timestamp", `${fromDate}-01`);
-        if (toDate) driversQuery = driversQuery.lte("timestamp", `${toDate}-31`);
+        if (toDate) driversQuery = driversQuery.lte("timestamp", endOfMonth(toDate));
         const { data, error } = await driversQuery;
         if (error) throw error;
 
