@@ -70,7 +70,7 @@ interface KPICardsRowProps {
 const formatNum = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 0 });
 
 const KPICardsRow = ({ onKPIClick, unitMode, frequency, activePlant, onMetricClick, onSeeAllMetrics, fromMonth, toMonth }: KPICardsRowProps) => {
-  const { data: kpis, isLoading: kpiLoading } = useKPIs();
+  const { data: kpis, isLoading: kpiLoading } = useKPIs(fromMonth, toMonth);
   const { data: shopData, isLoading: shopLoading } = useShopBreakdown(fromMonth, toMonth);
   const dl = frequency === "Daily" ? "vs prev day" : "vs prev month";
   const isLoading = kpiLoading || shopLoading;
