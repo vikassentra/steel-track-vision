@@ -8,20 +8,77 @@ const ImportData = () => {
   const [status, setStatus] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const cleanNumber = (val: any): number => {
+    if (val === null || val === undefined || val === "") return 0;
+    if (typeof val === "number") return val;
+    const s = String(val).replace(/,/g, "");
+    const n = Number(s);
+    return isNaN(n) ? 0 : n;
+  };
+
+  const parseTimestamp = (raw: any): string => {
+    if (!raw) return "2023-01-01";
+    const s = String(raw).trim();
+    const isoMatch = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (isoMatch) {
+      const [, yyyy, mm, dd] = isoMatch;
+      return `${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}`;
+    }
+    const parts = s.split(" ")[0].split("/");
+    if (parts.length === 3) {
+      const [mm, dd, yyyy] = parts;
+      return `${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}`;
+    }
+    return s.substring(0, 10);
+  };
+
+  const getVal = (row: any, ...names: string[]): any => {
+    const rowKeys = Object.keys(row);
+    for (const n of names) {
+      if (row[n] !== undefined && row[n] !== null) return row[n];
+      const found = rowKeys.find(k => k.trim().toLowerCase() === n.trim().toLowerCase());
+      if (found && row[found] !== undefined && row[found] !== null) return row[found];
+    }
+    return null;
+  };
+
   const handleImport = async () => {
     const file = fileRef.current?.files?.[0];
     if (!file) { toast({ title: "Select a file first" }); return; }
 
     setLoading(true);
-    setStatus("Reading Excel...");
+    setStatus("Parsing Excel locally...");
 
     try {
       const arrayBuffer = await file.arrayBuffer();
-      const base64 = btoa(
-        new Uint8Array(arrayBuffer).reduce((s, b) => s + String.fromCharCode(b), "")
-      );
+      const wb = XLSX.read(arrayBuffer, { type: "array" });
+      const sheetName = "WSA_OrgData";
+      const ws = wb.Sheets[sheetName];
+      if (!ws) throw new Error(`Sheet "${sheetName}" not found. Available: ${wb.SheetNames.join(", ")}`);
 
-      setStatus("Uploading to backend...");
+      const rawRows: any[] = XLSX.utils.sheet_to_json(ws);
+      setStatus(`Parsed ${rawRows.length} rows, mapping columns...`);
+
+      const rows = rawRows.map((r: any) => ({
+        driver_name: getVal(r, "ScopeDriverName", "Scope Driver Name", "DriverName") || "Unknown",
+        scope_category_name: getVal(r, "ScopeCategoryName", "Scope Category Name") || "",
+        scope_name: getVal(r, "ScopeName", "Scope Name") || "",
+        plant_name: getVal(r, "LevelGOrgPlantName", "Level G Org Plant Name", "PlantName") || "",
+        facility_name: getVal(r, "LevelFOrgFacilityName", "Level F Org Facility Name", "FacilityName") || "",
+        activity_data_value: cleanNumber(getVal(r, "ActivityDataValue", "Activity Data Value")),
+        timestamp: parseTimestamp(getVal(r, "Timestamp", "timestamp") || ""),
+        co2e_value: cleanNumber(getVal(r, "CO2e_Value", "CO2eValue", "CO2e Value", "CO2e_value")),
+        is_product: cleanNumber(getVal(r, "IsProduct", "Is Product")),
+        is_to_be_subtracted: cleanNumber(getVal(r, "IsToBeSubstracted", "IsToBeSubtracted", "Is To Be Subtracted")),
+        is_accepted: cleanNumber(getVal(r, "IsAccepted", "Is Accepted")),
+        emission_factor: cleanNumber(getVal(r, "EmissionFactor", "Emission Factor")),
+        ef_unit: getVal(r, "EF_Unit", "EF Unit", "EFUnit") || null,
+        ef_source: getVal(r, "EF_Source", "EF Source", "EFSource") || null,
+        user_type: getVal(r, "UserType", "User Type") || null,
+        source: getVal(r, "Source", "source") || null,
+      }));
+
+      setStatus(`Uploading ${rows.length} rows to backend...`);
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/import-orgdata`;
       const res = await fetch(url, {
         method: "POST",
@@ -29,7 +86,7 @@ const ImportData = () => {
           apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ base64, sheet: "WSA_OrgData" }),
+        body: JSON.stringify({ rows }),
       });
 
       const result = await res.json();
