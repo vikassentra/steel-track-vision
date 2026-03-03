@@ -114,25 +114,33 @@ const BreakdownPanels = ({ onShopClick, onScopeClick, onDriverClick, activeScope
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <div className="shrink-0 w-44">
-              <div className="grid grid-cols-2 gap-x-2 mb-2 pt-1">
+            <div className="shrink-0 w-56">
+              <div className="grid grid-cols-3 gap-x-2 mb-2 pt-1">
+                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider text-right">% Contrib</p>
                 <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider text-right">Δ Activity</p>
                 <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider text-right">Δ tCO₂e</p>
               </div>
               <div>
-                {driverChartData.map((row) => (
-                  <div
-                    key={row.driver}
-                    onClick={() => onDriverClick?.(row.driver)}
-                    className="grid grid-cols-2 gap-x-2 cursor-pointer hover:bg-secondary/30 rounded px-1 transition-colors items-center"
-                    style={{ height: "32px" }}
-                  >
-                    <p className="text-[11px] font-mono text-foreground text-right">{Math.round(row.total).toLocaleString()}</p>
-                    <p className={`text-[11px] font-mono font-semibold text-right ${row.emissionsChange > 0 ? "text-red-400" : "text-emerald-400"}`}>
-                      {row.emissionsChange > 0 ? "+" : ""}{row.emissionsChange.toLocaleString()}
-                    </p>
-                  </div>
-                ))}
+                {(() => {
+                  const grandTotal = driverChartData.reduce((sum, r) => sum + r.total, 0);
+                  return driverChartData.map((row) => {
+                    const pct = grandTotal > 0 ? ((row.total / grandTotal) * 100) : 0;
+                    return (
+                      <div
+                        key={row.driver}
+                        onClick={() => onDriverClick?.(row.driver)}
+                        className="grid grid-cols-3 gap-x-2 cursor-pointer hover:bg-secondary/30 rounded px-1 transition-colors items-center"
+                        style={{ height: "32px" }}
+                      >
+                        <p className="text-[11px] font-mono text-muted-foreground text-right">{pct.toFixed(1)}%</p>
+                        <p className="text-[11px] font-mono text-foreground text-right">{Math.round(row.total).toLocaleString()}</p>
+                        <p className={`text-[11px] font-mono font-semibold text-right ${row.emissionsChange > 0 ? "text-red-400" : "text-emerald-400"}`}>
+                          {row.emissionsChange > 0 ? "+" : ""}{row.emissionsChange.toLocaleString()}
+                        </p>
+                      </div>
+                    );
+                  });
+                })()}
               </div>
             </div>
           </div>
