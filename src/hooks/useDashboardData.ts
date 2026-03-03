@@ -82,8 +82,8 @@ export const useTrend = () =>
 export const useShopBreakdown = () =>
   useQuery<ShopBreakdownItem[]>({ queryKey: ["dashboard", "shop-breakdown"], queryFn: () => fetchDashboard("shop-breakdown"), ...queryDefaults });
 
-export const useDrivers = () =>
-  useQuery<DriverItem[]>({ queryKey: ["dashboard", "drivers"], queryFn: () => fetchDashboard("drivers"), ...queryDefaults });
+export const useDrivers = (plant?: string) =>
+  useQuery<DriverItem[]>({ queryKey: ["dashboard", "drivers", plant ?? "All"], queryFn: () => fetchDashboard(`drivers${plant && plant !== "All" ? `&plant=${encodeURIComponent(plant)}` : ""}`), ...queryDefaults });
 
 export const useBenchmarks = () =>
   useQuery<BenchmarkItem[]>({ queryKey: ["dashboard", "benchmarks"], queryFn: () => fetchDashboard("benchmarks"), ...queryDefaults });

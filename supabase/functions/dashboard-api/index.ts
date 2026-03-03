@@ -110,11 +110,16 @@ Deno.serve(async (req) => {
       }
 
       case "drivers": {
+        const plant = url.searchParams.get("plant");
         // Top drivers by emissions
-        const { data, error } = await supabase
+        let driversQuery = supabase
           .from("emissions_data")
           .select("driver_name, scope_name, plant_name, co2e_value, activity_data_value, is_to_be_subtracted")
           .eq("is_accepted", 1);
+        if (plant && plant !== "All") {
+          driversQuery = driversQuery.eq("plant_name", plant);
+        }
+        const { data, error } = await driversQuery;
         if (error) throw error;
 
         const driverMap = new Map<string, {
