@@ -63,13 +63,15 @@ interface KPICardsRowProps {
   activePlant: string;
   onMetricClick?: (metric: {title: string;value: string;unit: string;delta: number;}) => void;
   onSeeAllMetrics?: () => void;
+  fromMonth?: string;
+  toMonth?: string;
 }
 
 const formatNum = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 0 });
 
-const KPICardsRow = ({ onKPIClick, unitMode, frequency, activePlant, onMetricClick, onSeeAllMetrics }: KPICardsRowProps) => {
+const KPICardsRow = ({ onKPIClick, unitMode, frequency, activePlant, onMetricClick, onSeeAllMetrics, fromMonth, toMonth }: KPICardsRowProps) => {
   const { data: kpis, isLoading: kpiLoading } = useKPIs();
-  const { data: shopData, isLoading: shopLoading } = useShopBreakdown();
+  const { data: shopData, isLoading: shopLoading } = useShopBreakdown(fromMonth, toMonth);
   const dl = frequency === "Daily" ? "vs prev day" : "vs prev month";
   const isLoading = kpiLoading || shopLoading;
 

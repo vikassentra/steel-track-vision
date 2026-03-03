@@ -13,6 +13,8 @@ Deno.serve(async (req) => {
 
   const url = new URL(req.url);
   const action = url.searchParams.get("action");
+  const fromDate = url.searchParams.get("from"); // YYYY-MM format
+  const toDate = url.searchParams.get("to");     // YYYY-MM format
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
@@ -37,11 +39,14 @@ Deno.serve(async (req) => {
 
       case "trend": {
         // Monthly emissions aggregated by scope
-        const { data, error } = await supabase
+        let trendQuery = supabase
           .from("emissions_data")
           .select("timestamp, scope_name, co2e_value, is_to_be_subtracted")
           .eq("is_accepted", 1)
           .order("timestamp");
+        if (fromDate) trendQuery = trendQuery.gte("timestamp", `${fromDate}-01`);
+        if (toDate) trendQuery = trendQuery.lte("timestamp", `${toDate}-31`);
+        const { data, error } = await trendQuery;
         if (error) throw error;
 
         // Aggregate by month
@@ -82,6 +87,58 @@ Deno.serve(async (req) => {
       }
 
       case "shop-breakdown": {
+        // When date filters are applied, compute from emissions_data directly
+        if (fromDate || toDate) {
+          let sbQuery = supabase
+            .from("emissions_data")
+            .select("plant_name, scope_name, co2e_value, is_to_be_subtracted, activity_data_value, is_product")
+            .eq("is_accepted", 1);
+          if (fromDate) sbQuery = sbQuery.gte("timestamp", `${fromDate}-01`);
+          if (toDate) sbQuery = sbQuery.lte("timestamp", `${toDate}-31`);
+          const { data: emData, error: emError } = await sbQuery;
+          if (emError) throw emError;
+
+          const plantMap = new Map<string, { s1: number; s2: number; s3: number; s3m: number; prod: number }>();
+          (emData ?? []).forEach((row: any) => {
+            if (!plantMap.has(row.plant_name)) {
+              plantMap.set(row.plant_name, { s1: 0, s2: 0, s3: 0, s3m: 0, prod: 0 });
+            }
+            const e = plantMap.get(row.plant_name)!;
+            const val = Number(row.co2e_value) * (row.is_to_be_subtracted === 1 ? -1 : 1);
+            if (row.scope_name === "Scope 1") e.s1 += val;
+            else if (row.scope_name === "Scope 2") e.s2 += val;
+            else if (row.scope_name === "Scope 3 + mining") e.s3m += val;
+            else if (row.scope_name === "Scope 3") e.s3 += val;
+            if (row.is_product === 1) e.prod += Number(row.activity_data_value);
+          });
+
+          const production = 5000000; // fallback
+          const shops = Array.from(plantMap.entries())
+            .map(([name, d]) => {
+              const total = d.s1 + d.s2 + d.s3 + d.s3m;
+              const prod = d.prod > 0 ? d.prod : production / plantMap.size;
+              return {
+                shop: name,
+                scope1: Math.round(d.s1),
+                scope2: Math.round(d.s2),
+                scope3: Math.round(d.s3),
+                scope3Mining: Math.round(d.s3m),
+                total: Math.round(total),
+                intensity: +(total / prod).toFixed(4),
+                production: Math.round(prod),
+                s1Intensity: +(d.s1 / prod).toFixed(3),
+                s2Intensity: +(d.s2 / prod).toFixed(3),
+                s3Intensity: +(d.s3 / prod).toFixed(3),
+                s3MiningIntensity: +(d.s3m / prod).toFixed(3),
+              };
+            })
+            .sort((a, b) => b.total - a.total);
+
+          return new Response(JSON.stringify(shops), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
         // Use pre-calculated plant KPIs from the Formula tab
         const { data: plantData, error: plantError } = await supabase
           .from("plant_kpis")
@@ -119,6 +176,8 @@ Deno.serve(async (req) => {
         if (plant && plant !== "All") {
           driversQuery = driversQuery.eq("plant_name", plant);
         }
+        if (fromDate) driversQuery = driversQuery.gte("timestamp", `${fromDate}-01`);
+        if (toDate) driversQuery = driversQuery.lte("timestamp", `${toDate}-31`);
         const { data, error } = await driversQuery;
         if (error) throw error;
 

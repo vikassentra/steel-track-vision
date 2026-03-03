@@ -12,6 +12,8 @@ interface BreakdownPanelsProps {
   activeScope: string;
   unitMode: UnitMode;
   activePlant: string;
+  fromMonth?: string;
+  toMonth?: string;
 }
 
 const absUnit = (mode: UnitMode) => mode === "energy" ? "TJ/t" : "tCO2e/t";
@@ -47,10 +49,10 @@ const DriverTooltip = ({ active, payload }: any) => {
   );
 };
 
-const BreakdownPanels = ({ onShopClick, onScopeClick, onDriverClick, activeScope, unitMode, activePlant }: BreakdownPanelsProps) => {
-  const { data: shopData, isLoading: shopsLoading } = useShopBreakdown();
+const BreakdownPanels = ({ onShopClick, onScopeClick, onDriverClick, activeScope, unitMode, activePlant, fromMonth, toMonth }: BreakdownPanelsProps) => {
+  const { data: shopData, isLoading: shopsLoading } = useShopBreakdown(fromMonth, toMonth);
   const plantFullName = activePlant !== "All" ? getPlantFullName(activePlant) : undefined;
-  const { data: driverData, isLoading: driversLoading } = useDrivers(plantFullName ?? activePlant);
+  const { data: driverData, isLoading: driversLoading } = useDrivers(plantFullName ?? activePlant, fromMonth, toMonth);
   const u = absUnit(unitMode);
 
   const shopBreakdowns = shopData ?? [];

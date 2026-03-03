@@ -136,6 +136,8 @@ const Index = () => {
           activePlant={activeShop}
           onMetricClick={(m) => setSelectedMetric(m)}
           onSeeAllMetrics={() => setAllMetricsOpen(true)}
+          fromMonth={fromMonth}
+          toMonth={toMonth}
         />
 
         {/* Breakdown Panels */}
@@ -145,14 +147,16 @@ const Index = () => {
           onDriverClick={(driver) => setSelectedDriver(driver)}
           activeScope={activeScope}
           unitMode={unitMode}
-          activePlant={activeShop} />
+          activePlant={activeShop}
+          fromMonth={fromMonth}
+          toMonth={toMonth} />
 
         {/* Peer Benchmark */}
         <PeerBenchmark unitMode={unitMode} />
       </div>
 
       {/* Trend Chart - full width edge to edge, after Peer Benchmark */}
-      <TrendChart onPointClick={handlePointClick} unitMode={unitMode} frequency={activeFrequency} />
+      <TrendChart onPointClick={handlePointClick} unitMode={unitMode} frequency={activeFrequency} fromMonth={fromMonth} toMonth={toMonth} />
 
       <div className="p-6 max-w-[1600px] mx-auto">
         {/* Footer */}
