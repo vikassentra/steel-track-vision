@@ -24,6 +24,7 @@ const ShopTooltip = ({ active, payload, unitMode }: any) => {
       <p><span className="text-scope1">S1:</span> {d.scope1.toLocaleString()}</p>
       <p><span className="text-scope2">S2:</span> {d.scope2.toLocaleString()}</p>
       <p><span className="text-scope3">S3:</span> {d.scope3.toLocaleString()}</p>
+      <p><span style={{ color: "hsl(330 65% 55%)" }}>S3+Mining:</span> {d.scope3Mining.toLocaleString()}</p>
       <p className="font-medium mt-1">Total: {d.total.toLocaleString()} {u}</p>
       <p className="font-medium text-sky-400">Intensity: {d.intensity?.toFixed(3)} tCO₂e/t</p>
     </div>
@@ -69,12 +70,13 @@ const BreakdownPanels = ({ onShopClick, onScopeClick, onDriverClick, activeScope
               <YAxis yAxisId="right" orientation="left" tick={{ fontSize: 10, fill: "hsl(var(--chart-5))" }} tickFormatter={(v: number) => v.toFixed(2)} label={{ value: "tCO₂e/t", angle: -90, position: "insideLeft", style: { fontSize: 10, fill: "hsl(215 15% 55%)" } }} />
               <Tooltip content={<ShopTooltip unitMode={unitMode} />} />
               <Legend wrapperStyle={{ fontSize: 10 }} formatter={(value: string) => {
-                const labels: Record<string, string> = { scope1: "Scope 1", scope2: "Scope 2", scope3: "Scope 3", intensity: "Intensity (tCO₂e/t)" };
+                const labels: Record<string, string> = { scope1: "Scope 1", scope2: "Scope 2", scope3: "Scope 3", scope3Mining: "S3+Mining", intensity: "Intensity (tCO₂e/t)" };
                 return labels[value] || value;
               }} />
               <Bar yAxisId="left" dataKey="scope1" stackId="a" fill="hsl(168 70% 50%)" />
               <Bar yAxisId="left" dataKey="scope2" stackId="a" fill="hsl(45 95% 58%)" />
-              <Bar yAxisId="left" dataKey="scope3" stackId="a" fill="hsl(270 60% 60%)" radius={[2, 2, 0, 0]} />
+              <Bar yAxisId="left" dataKey="scope3" stackId="a" fill="hsl(270 60% 60%)" />
+              <Bar yAxisId="left" dataKey="scope3Mining" stackId="a" fill="hsl(330 65% 55%)" radius={[2, 2, 0, 0]} />
               <Line yAxisId="right" type="monotone" dataKey="intensity" stroke="hsl(var(--chart-5))" strokeWidth={2} dot={{ r: 4, fill: "hsl(var(--chart-5))" }} />
             </ComposedChart>
           </ResponsiveContainer>
