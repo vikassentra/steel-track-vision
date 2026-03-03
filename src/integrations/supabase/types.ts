@@ -14,7 +14,117 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      benchmarks: {
+        Row: {
+          company: string
+          id: number
+          intensity_value: number
+          site: string | null
+          type: string
+          year: string
+        }
+        Insert: {
+          company: string
+          id?: number
+          intensity_value: number
+          site?: string | null
+          type: string
+          year: string
+        }
+        Update: {
+          company?: string
+          id?: number
+          intensity_value?: number
+          site?: string | null
+          type?: string
+          year?: string
+        }
+        Relationships: []
+      }
+      emissions_data: {
+        Row: {
+          activity_data_value: number | null
+          co2e_value: number | null
+          driver_name: string
+          ef_source: string | null
+          ef_unit: string | null
+          emission_factor: number | null
+          facility_name: string
+          id: number
+          is_accepted: number | null
+          is_product: number | null
+          is_to_be_subtracted: number | null
+          plant_name: string
+          scope_category_name: string
+          scope_name: string
+          source: string | null
+          timestamp: string
+          user_type: string | null
+        }
+        Insert: {
+          activity_data_value?: number | null
+          co2e_value?: number | null
+          driver_name: string
+          ef_source?: string | null
+          ef_unit?: string | null
+          emission_factor?: number | null
+          facility_name: string
+          id?: number
+          is_accepted?: number | null
+          is_product?: number | null
+          is_to_be_subtracted?: number | null
+          plant_name: string
+          scope_category_name: string
+          scope_name: string
+          source?: string | null
+          timestamp: string
+          user_type?: string | null
+        }
+        Update: {
+          activity_data_value?: number | null
+          co2e_value?: number | null
+          driver_name?: string
+          ef_source?: string | null
+          ef_unit?: string | null
+          emission_factor?: number | null
+          facility_name?: string
+          id?: number
+          is_accepted?: number | null
+          is_product?: number | null
+          is_to_be_subtracted?: number | null
+          plant_name?: string
+          scope_category_name?: string
+          scope_name?: string
+          source?: string | null
+          timestamp?: string
+          user_type?: string | null
+        }
+        Relationships: []
+      }
+      kpi_values: {
+        Row: {
+          id: number
+          metric_name: string
+          unit: string
+          updated_at: string | null
+          value: number
+        }
+        Insert: {
+          id?: number
+          metric_name: string
+          unit: string
+          updated_at?: string | null
+          value: number
+        }
+        Update: {
+          id?: number
+          metric_name?: string
+          unit?: string
+          updated_at?: string | null
+          value?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
