@@ -18,6 +18,17 @@ const ImportData = () => {
 
   const parseTimestamp = (raw: any): string => {
     if (!raw) return "2023-01-01";
+    // Handle Excel serial date numbers (e.g. 44927 = 2023-01-01)
+    if (typeof raw === "number" || /^\d{4,6}$/.test(String(raw).trim())) {
+      const serial = Number(raw);
+      // Excel epoch is 1900-01-01, but Excel thinks 1900 was a leap year (off by 1 after Feb 28 1900)
+      const excelEpoch = new Date(1899, 11, 30); // Dec 30, 1899
+      const date = new Date(excelEpoch.getTime() + serial * 86400000);
+      const yyyy = date.getFullYear();
+      const mm = String(date.getMonth() + 1).padStart(2, "0");
+      const dd = String(date.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
     const s = String(raw).trim();
     const isoMatch = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
     if (isoMatch) {
