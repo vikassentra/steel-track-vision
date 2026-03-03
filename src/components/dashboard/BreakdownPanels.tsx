@@ -114,8 +114,8 @@ const BreakdownPanels = ({ onShopClick, onScopeClick, onDriverClick, activeScope
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <div className="shrink-0 w-56">
-              <div className="grid grid-cols-3 gap-x-2 mb-2 pt-1">
+            <div className="shrink-0 w-56 pt-[6px]">
+              <div className="grid grid-cols-3 gap-x-2 mb-1">
                 <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider text-right">% Contrib</p>
                 <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider text-right">Δ Activity</p>
                 <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider text-right">Δ tCO₂e</p>
