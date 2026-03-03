@@ -1,6 +1,6 @@
 import { useShopBreakdown, useDrivers } from "@/hooks/useDashboardData";
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ComposedChart, Line
 } from "recharts";
 import type { UnitMode } from "@/pages/Index";
 
@@ -25,6 +25,7 @@ const ShopTooltip = ({ active, payload, unitMode }: any) => {
       <p><span className="text-scope2">S2:</span> {d.scope2.toLocaleString()}</p>
       <p><span className="text-scope3">S3:</span> {d.scope3.toLocaleString()}</p>
       <p className="font-medium mt-1">Total: {d.total.toLocaleString()} {u}</p>
+      <p className="font-medium text-sky-400">Intensity: {d.intensity?.toFixed(3)} tCO₂e/t</p>
     </div>
   );
 };
@@ -61,15 +62,21 @@ const BreakdownPanels = ({ onShopClick, onScopeClick, onDriverClick, activeScope
           <div className="animate-pulse h-[300px] bg-muted/20 rounded" />
         ) : (
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={shopBreakdowns} onClick={(e: any) => e?.activeLabel && onShopClick(e.activeLabel)}>
+            <ComposedChart data={shopBreakdowns} onClick={(e: any) => e?.activeLabel && onShopClick(e.activeLabel)}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 18%)" />
               <XAxis dataKey="shop" tick={{ fontSize: 9, fill: "hsl(215 15% 55%)" }} angle={-20} textAnchor="end" height={50} />
-              <YAxis tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }} />
+              <YAxis yAxisId="left" tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }} />
+              <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10, fill: "hsl(var(--chart-5))" }} tickFormatter={(v: number) => v.toFixed(1)} />
               <Tooltip content={<ShopTooltip unitMode={unitMode} />} />
-              <Bar dataKey="scope1" stackId="a" fill="hsl(168 70% 50%)" />
-              <Bar dataKey="scope2" stackId="a" fill="hsl(45 95% 58%)" />
-              <Bar dataKey="scope3" stackId="a" fill="hsl(270 60% 60%)" radius={[2, 2, 0, 0]} />
-            </BarChart>
+              <Legend wrapperStyle={{ fontSize: 10 }} formatter={(value: string) => {
+                const labels: Record<string, string> = { scope1: "Scope 1", scope2: "Scope 2", scope3: "Scope 3", intensity: "Intensity (tCO₂e/t)" };
+                return labels[value] || value;
+              }} />
+              <Bar yAxisId="left" dataKey="scope1" stackId="a" fill="hsl(168 70% 50%)" />
+              <Bar yAxisId="left" dataKey="scope2" stackId="a" fill="hsl(45 95% 58%)" />
+              <Bar yAxisId="left" dataKey="scope3" stackId="a" fill="hsl(270 60% 60%)" radius={[2, 2, 0, 0]} />
+              <Line yAxisId="right" type="monotone" dataKey="intensity" stroke="hsl(var(--chart-5))" strokeWidth={2} dot={{ r: 4, fill: "hsl(var(--chart-5))" }} />
+            </ComposedChart>
           </ResponsiveContainer>
         )}
       </div>

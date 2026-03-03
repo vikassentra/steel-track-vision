@@ -42,6 +42,7 @@ export interface ShopBreakdownItem {
   scope2: number;
   scope3: number;
   total: number;
+  intensity: number;
 }
 
 export interface DriverItem {
