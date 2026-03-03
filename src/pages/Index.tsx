@@ -12,7 +12,7 @@ import RunAnalyticsModal from "@/components/dashboard/RunAnalyticsModal";
 import SentraAIModal from "@/components/dashboard/SentraAIModal";
 import AllMetricsModal from "@/components/dashboard/AllMetricsModal";
 import MetricDetailModal from "@/components/dashboard/MetricDetailModal";
-import { plants } from "@/data/mockData";
+import { PLANT_ABBREVS } from "@/lib/plantMapping";
 
 export type UnitMode = "emissions" | "energy";
 
@@ -25,7 +25,7 @@ const Index = () => {
   const [toMonth, setToMonth] = useState("2025-03");
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [unitMode, setUnitMode] = useState<UnitMode>("emissions");
-  const [activeShop, setActiveShop] = useState("BF");
+  const [activeShop, setActiveShop] = useState("All");
   const [selectedDriver, setSelectedDriver] = useState<string | null>(null);
   const [selectedShop, setSelectedShop] = useState<string | null>(null);
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
@@ -74,7 +74,7 @@ const Index = () => {
         {/* Plant + Unit toggles */}
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex bg-secondary rounded-md p-0.5">
-            {["COP", "SP", "BF", "BOF", "RM"].map((s) =>
+            {PLANT_ABBREVS.map((s) =>
             <button
               key={s}
               onClick={() => setActiveShop(s)}
@@ -130,6 +130,7 @@ const Index = () => {
           onKPIClick={() => setDrawerOpen(true)}
           unitMode={unitMode}
           frequency={activeFrequency}
+          activePlant={activeShop}
           onMetricClick={(m) => setSelectedMetric(m)}
           onSeeAllMetrics={() => setAllMetricsOpen(true)}
         />

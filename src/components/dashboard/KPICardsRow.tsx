@@ -1,6 +1,7 @@
 import { ArrowDown, ArrowUp, Minus } from "lucide-react";
 import type { UnitMode } from "@/pages/Index";
-import { useKPIs } from "@/hooks/useDashboardData";
+import { useKPIs, useShopBreakdown } from "@/hooks/useDashboardData";
+import { getPlantFullName } from "@/lib/plantMapping";
 
 interface KPICardProps {
   title: string;
@@ -59,15 +60,18 @@ interface KPICardsRowProps {
   onKPIClick: () => void;
   unitMode: UnitMode;
   frequency: "Monthly" | "Daily";
+  activePlant: string;
   onMetricClick?: (metric: {title: string;value: string;unit: string;delta: number;}) => void;
   onSeeAllMetrics?: () => void;
 }
 
 const formatNum = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 0 });
 
-const KPICardsRow = ({ onKPIClick, unitMode, frequency, onMetricClick, onSeeAllMetrics }: KPICardsRowProps) => {
-  const { data: kpis, isLoading } = useKPIs();
+const KPICardsRow = ({ onKPIClick, unitMode, frequency, activePlant, onMetricClick, onSeeAllMetrics }: KPICardsRowProps) => {
+  const { data: kpis, isLoading: kpiLoading } = useKPIs();
+  const { data: shopData, isLoading: shopLoading } = useShopBreakdown();
   const dl = frequency === "Daily" ? "vs prev day" : "vs prev month";
+  const isLoading = kpiLoading || shopLoading;
 
   if (isLoading || !kpis) {
     return (
@@ -82,7 +86,20 @@ const KPICardsRow = ({ onKPIClick, unitMode, frequency, onMetricClick, onSeeAllM
   const iU = unitMode === "energy" ? "TJ/t" : "tCO2e/t";
   const absU = unitMode === "energy" ? "TJ" : "tCO2e";
 
-  const intensityScopeBreakdown = [
+  // Find plant-specific data when a plant is selected
+  const plantFullName = getPlantFullName(activePlant);
+  const plantData = activePlant !== "All" ? shopData?.find(s => s.shop === plantFullName) : null;
+
+  const totalEmissions = plantData ? plantData.total : (kpis.total_emissions?.value ?? 0);
+  const production = plantData ? plantData.production : (kpis.production?.value ?? 0);
+  const intensity = plantData ? plantData.intensity : (kpis.intensity?.value ?? 0);
+
+  const intensityScopeBreakdown = plantData ? [
+    { label: "S1", value: plantData.s1Intensity.toFixed(2), unit: iU },
+    { label: "S2", value: plantData.s2Intensity.toFixed(2), unit: iU },
+    { label: "S3", value: plantData.s3Intensity.toFixed(2), unit: iU },
+    { label: "S3+Mining", value: plantData.s3MiningIntensity.toFixed(2), unit: iU },
+  ] : [
     { label: "S1", value: kpis.intensity_s1?.value?.toFixed(2) ?? "—", unit: iU },
     { label: "S2", value: kpis.intensity_s2?.value?.toFixed(2) ?? "—", unit: iU },
     { label: "S3", value: kpis.intensity_s3?.value?.toFixed(2) ?? "—", unit: iU },
@@ -90,9 +107,9 @@ const KPICardsRow = ({ onKPIClick, unitMode, frequency, onMetricClick, onSeeAllM
   ];
 
   const mainCards: (KPICardProps & {scopeBreakdown?: {label: string;value: string;unit: string;}[];})[] = [
-    { title: "Total Emissions", value: formatNum(kpis.total_emissions?.value ?? 0), unit: absU, delta: 3.4, deltaLabel: dl },
-    { title: "Production", value: formatNum(kpis.production?.value ?? 0), unit: "tonnes", delta: 2.1, deltaLabel: dl },
-    { title: "Intensity", value: kpis.intensity?.value?.toFixed(3) ?? "—", unit: iU, delta: 1.8, deltaLabel: dl, scopeBreakdown: intensityScopeBreakdown },
+    { title: "Total Emissions", value: formatNum(totalEmissions), unit: absU, delta: 3.4, deltaLabel: dl },
+    { title: "Production", value: formatNum(production), unit: "tonnes", delta: 2.1, deltaLabel: dl },
+    { title: "Intensity", value: intensity.toFixed(3), unit: iU, delta: 1.8, deltaLabel: dl, scopeBreakdown: intensityScopeBreakdown },
   ];
 
   const paramCards: (KPICardProps & {scopeBreakdown?: {label: string;value: string;unit: string;}[];})[] = [
