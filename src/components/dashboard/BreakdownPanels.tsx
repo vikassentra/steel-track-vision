@@ -1,4 +1,5 @@
 import { useShopBreakdown, useDrivers } from "@/hooks/useDashboardData";
+import { getPlantFullName } from "@/lib/plantMapping";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ComposedChart, Line
 } from "recharts";
@@ -10,6 +11,7 @@ interface BreakdownPanelsProps {
   onDriverClick?: (driver: string) => void;
   activeScope: string;
   unitMode: UnitMode;
+  activePlant: string;
 }
 
 const absUnit = (mode: UnitMode) => mode === "energy" ? "TJ/t" : "tCO2e/t";
@@ -45,9 +47,10 @@ const DriverTooltip = ({ active, payload }: any) => {
   );
 };
 
-const BreakdownPanels = ({ onShopClick, onScopeClick, onDriverClick, activeScope, unitMode }: BreakdownPanelsProps) => {
+const BreakdownPanels = ({ onShopClick, onScopeClick, onDriverClick, activeScope, unitMode, activePlant }: BreakdownPanelsProps) => {
   const { data: shopData, isLoading: shopsLoading } = useShopBreakdown();
-  const { data: driverData, isLoading: driversLoading } = useDrivers();
+  const plantFullName = activePlant !== "All" ? getPlantFullName(activePlant) : undefined;
+  const { data: driverData, isLoading: driversLoading } = useDrivers(plantFullName ?? activePlant);
   const u = absUnit(unitMode);
 
   const shopBreakdowns = shopData ?? [];

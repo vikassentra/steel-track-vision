@@ -12,7 +12,7 @@ import RunAnalyticsModal from "@/components/dashboard/RunAnalyticsModal";
 import SentraAIModal from "@/components/dashboard/SentraAIModal";
 import AllMetricsModal from "@/components/dashboard/AllMetricsModal";
 import MetricDetailModal from "@/components/dashboard/MetricDetailModal";
-import { PLANT_ABBREVS } from "@/lib/plantMapping";
+import { PLANT_ABBREVS, PLANT_ABBREV } from "@/lib/plantMapping";
 
 export type UnitMode = "emissions" | "energy";
 
@@ -39,6 +39,9 @@ const Index = () => {
   };
 
   const handleShopClick = (shop: string) => {
+    // Map full plant name back to abbreviation for the toggle
+    const abbrev = Object.entries(PLANT_ABBREV).find(([, full]) => full === shop)?.[0] ?? shop;
+    setActiveShop(abbrev);
     setSelectedShop(shop);
   };
 
@@ -141,7 +144,8 @@ const Index = () => {
           onScopeClick={handleScopeClick}
           onDriverClick={(driver) => setSelectedDriver(driver)}
           activeScope={activeScope}
-          unitMode={unitMode} />
+          unitMode={unitMode}
+          activePlant={activeShop} />
 
         {/* Peer Benchmark */}
         <PeerBenchmark unitMode={unitMode} />
