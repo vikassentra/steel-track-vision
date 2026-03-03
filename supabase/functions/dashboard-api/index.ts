@@ -6,6 +6,22 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+// Fetch all rows from a query, paginating in batches of 1000
+async function fetchAll(queryBuilder: any): Promise<any[]> {
+  const PAGE_SIZE = 1000;
+  let allData: any[] = [];
+  let from = 0;
+  while (true) {
+    const { data, error } = await queryBuilder.range(from, from + PAGE_SIZE - 1);
+    if (error) throw error;
+    if (!data || data.length === 0) break;
+    allData = allData.concat(data);
+    if (data.length < PAGE_SIZE) break;
+    from += PAGE_SIZE;
+  }
+  return allData;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -13,10 +29,9 @@ Deno.serve(async (req) => {
 
   const url = new URL(req.url);
   const action = url.searchParams.get("action");
-  const fromDate = url.searchParams.get("from"); // YYYY-MM format
-  const toDate = url.searchParams.get("to");     // YYYY-MM format
+  const fromDate = url.searchParams.get("from");
+  const toDate = url.searchParams.get("to");
 
-  // Compute last day of a YYYY-MM month
   const endOfMonth = (ym: string) => {
     const [y, m] = ym.split("-").map(Number);
     const lastDay = new Date(y, m, 0).getDate();
@@ -28,22 +43,51 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
 
+  // Helper to build a filtered emissions query (returns builder before .range)
+  const emissionsQuery = (selectCols: string) => {
+    let q = supabase
+      .from("emissions_data")
+      .select(selectCols)
+      .eq("is_accepted", 1);
+    if (fromDate) q = q.gte("timestamp", `${fromDate}-01`);
+    if (toDate) q = q.lte("timestamp", endOfMonth(toDate));
+    return q;
+  };
+
+  // Paginated fetch for emissions data
+  const fetchEmissions = async (selectCols: string, extraFilters?: (q: any) => any) => {
+    const PAGE_SIZE = 1000;
+    let allData: any[] = [];
+    let from = 0;
+    while (true) {
+      let q = supabase
+        .from("emissions_data")
+        .select(selectCols)
+        .eq("is_accepted", 1);
+      if (fromDate) q = q.gte("timestamp", `${fromDate}-01`);
+      if (toDate) q = q.lte("timestamp", endOfMonth(toDate));
+      if (extraFilters) q = extraFilters(q);
+      q = q.range(from, from + PAGE_SIZE - 1);
+      const { data, error } = await q;
+      if (error) throw error;
+      if (!data || data.length === 0) break;
+      allData = allData.concat(data);
+      if (data.length < PAGE_SIZE) break;
+      from += PAGE_SIZE;
+    }
+    return allData;
+  };
+
   try {
     switch (action) {
       case "kpis": {
-        // If date filters provided, compute KPIs dynamically from emissions_data
         if (fromDate || toDate) {
-          let q = supabase
-            .from("emissions_data")
-            .select("scope_name, co2e_value, is_to_be_subtracted, activity_data_value, is_product")
-            .eq("is_accepted", 1);
-          if (fromDate) q = q.gte("timestamp", `${fromDate}-01`);
-          if (toDate) q = q.lte("timestamp", endOfMonth(toDate));
-          const { data: emData, error: emError } = await q;
-          if (emError) throw emError;
+          const emData = await fetchEmissions(
+            "scope_name, co2e_value, is_to_be_subtracted, activity_data_value, is_product"
+          );
 
           let s1 = 0, s2 = 0, s3 = 0, s3m = 0, prod = 0;
-          (emData ?? []).forEach((row: any) => {
+          emData.forEach((row: any) => {
             const val = Number(row.co2e_value) * (row.is_to_be_subtracted === 1 ? -1 : 1);
             if (row.scope_name === "Scope 1") s1 += val;
             else if (row.scope_name === "Scope 2") s2 += val;
@@ -75,10 +119,7 @@ Deno.serve(async (req) => {
           });
         }
 
-        // No date filters — use static kpi_values table
-        const { data, error } = await supabase
-          .from("kpi_values")
-          .select("*");
+        const { data, error } = await supabase.from("kpi_values").select("*");
         if (error) throw error;
         const kpiMap: Record<string, { value: number; unit: string }> = {};
         data.forEach((row: any) => {
@@ -90,21 +131,13 @@ Deno.serve(async (req) => {
       }
 
       case "trend": {
-        // Monthly emissions aggregated by scope
-        let trendQuery = supabase
-          .from("emissions_data")
-          .select("timestamp, scope_name, co2e_value, is_to_be_subtracted")
-          .eq("is_accepted", 1)
-          .order("timestamp");
-        if (fromDate) trendQuery = trendQuery.gte("timestamp", `${fromDate}-01`);
-        if (toDate) trendQuery = trendQuery.lte("timestamp", endOfMonth(toDate));
-        const { data, error } = await trendQuery;
-        if (error) throw error;
+        const data = await fetchEmissions(
+          "timestamp, scope_name, co2e_value, is_to_be_subtracted"
+        );
 
-        // Aggregate by month
         const monthlyMap = new Map<string, { scope1: number; scope2: number; scope3: number }>();
         data.forEach((row: any) => {
-          const month = row.timestamp.substring(0, 7); // YYYY-MM
+          const month = row.timestamp.substring(0, 7);
           if (!monthlyMap.has(month)) {
             monthlyMap.set(month, { scope1: 0, scope2: 0, scope3: 0 });
           }
@@ -115,7 +148,6 @@ Deno.serve(async (req) => {
           else if (row.scope_name === "Scope 3" || row.scope_name === "Scope 3 + mining") entry.scope3 += val;
         });
 
-        // Get production from KPI (5M/12 per month)
         const monthlyProduction = 5000000 / 12;
 
         const trend = Array.from(monthlyMap.entries())
@@ -139,19 +171,13 @@ Deno.serve(async (req) => {
       }
 
       case "shop-breakdown": {
-        // When date filters are applied, compute from emissions_data directly
         if (fromDate || toDate) {
-          let sbQuery = supabase
-            .from("emissions_data")
-            .select("plant_name, scope_name, co2e_value, is_to_be_subtracted, activity_data_value, is_product")
-            .eq("is_accepted", 1);
-          if (fromDate) sbQuery = sbQuery.gte("timestamp", `${fromDate}-01`);
-          if (toDate) sbQuery = sbQuery.lte("timestamp", endOfMonth(toDate));
-          const { data: emData, error: emError } = await sbQuery;
-          if (emError) throw emError;
+          const emData = await fetchEmissions(
+            "plant_name, scope_name, co2e_value, is_to_be_subtracted, activity_data_value, is_product"
+          );
 
           const plantMap = new Map<string, { s1: number; s2: number; s3: number; s3m: number; prod: number }>();
-          (emData ?? []).forEach((row: any) => {
+          emData.forEach((row: any) => {
             if (!plantMap.has(row.plant_name)) {
               plantMap.set(row.plant_name, { s1: 0, s2: 0, s3: 0, s3m: 0, prod: 0 });
             }
@@ -164,7 +190,7 @@ Deno.serve(async (req) => {
             if (row.is_product === 1) e.prod += Number(row.activity_data_value);
           });
 
-          const production = 5000000; // fallback
+          const production = 5000000;
           const shops = Array.from(plantMap.entries())
             .map(([name, d]) => {
               const total = d.s1 + d.s2 + d.s3 + d.s3m;
@@ -191,7 +217,6 @@ Deno.serve(async (req) => {
           });
         }
 
-        // Use pre-calculated plant KPIs from the Formula tab
         const { data: plantData, error: plantError } = await supabase
           .from("plant_kpis")
           .select("*")
@@ -220,18 +245,14 @@ Deno.serve(async (req) => {
 
       case "drivers": {
         const plant = url.searchParams.get("plant");
-        // Top drivers by emissions
-        let driversQuery = supabase
-          .from("emissions_data")
-          .select("driver_name, scope_name, plant_name, co2e_value, activity_data_value, is_to_be_subtracted")
-          .eq("is_accepted", 1);
-        if (plant && plant !== "All") {
-          driversQuery = driversQuery.eq("plant_name", plant);
-        }
-        if (fromDate) driversQuery = driversQuery.gte("timestamp", `${fromDate}-01`);
-        if (toDate) driversQuery = driversQuery.lte("timestamp", endOfMonth(toDate));
-        const { data, error } = await driversQuery;
-        if (error) throw error;
+        const extraFilters = plant && plant !== "All"
+          ? (q: any) => q.eq("plant_name", plant)
+          : undefined;
+
+        const data = await fetchEmissions(
+          "driver_name, scope_name, plant_name, co2e_value, activity_data_value, is_to_be_subtracted",
+          extraFilters
+        );
 
         const driverMap = new Map<string, {
           driver: string; scope: string; shop: string;
