@@ -131,9 +131,13 @@ export type Database = {
           intensity: number
           plant_name: string
           production: number
+          s1_emissions: number
           s1_intensity: number
+          s2_emissions: number
           s2_intensity: number
+          s3_emissions: number
           s3_intensity: number
+          s3_mining_emissions: number
           s3_mining_intensity: number
           total_emissions: number
           updated_at: string | null
@@ -143,9 +147,13 @@ export type Database = {
           intensity: number
           plant_name: string
           production?: number
+          s1_emissions?: number
           s1_intensity?: number
+          s2_emissions?: number
           s2_intensity?: number
+          s3_emissions?: number
           s3_intensity?: number
+          s3_mining_emissions?: number
           s3_mining_intensity?: number
           total_emissions: number
           updated_at?: string | null
@@ -155,9 +163,13 @@ export type Database = {
           intensity?: number
           plant_name?: string
           production?: number
+          s1_emissions?: number
           s1_intensity?: number
+          s2_emissions?: number
           s2_intensity?: number
+          s3_emissions?: number
           s3_intensity?: number
+          s3_mining_emissions?: number
           s3_mining_intensity?: number
           total_emissions?: number
           updated_at?: string | null
