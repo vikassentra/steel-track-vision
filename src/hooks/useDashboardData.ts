@@ -64,17 +64,19 @@ export interface BenchmarkItem {
   intensity_value: number;
 }
 
+const queryDefaults = { staleTime: 5 * 60 * 1000, retry: 3, retryDelay: (attempt: number) => Math.min(1000 * 2 ** attempt, 10000) };
+
 export const useKPIs = () =>
-  useQuery<KPIData>({ queryKey: ["dashboard", "kpis"], queryFn: () => fetchDashboard("kpis"), staleTime: 5 * 60 * 1000 });
+  useQuery<KPIData>({ queryKey: ["dashboard", "kpis"], queryFn: () => fetchDashboard("kpis"), ...queryDefaults });
 
 export const useTrend = () =>
-  useQuery<TrendPoint[]>({ queryKey: ["dashboard", "trend"], queryFn: () => fetchDashboard("trend"), staleTime: 5 * 60 * 1000 });
+  useQuery<TrendPoint[]>({ queryKey: ["dashboard", "trend"], queryFn: () => fetchDashboard("trend"), ...queryDefaults });
 
 export const useShopBreakdown = () =>
-  useQuery<ShopBreakdownItem[]>({ queryKey: ["dashboard", "shop-breakdown"], queryFn: () => fetchDashboard("shop-breakdown"), staleTime: 5 * 60 * 1000 });
+  useQuery<ShopBreakdownItem[]>({ queryKey: ["dashboard", "shop-breakdown"], queryFn: () => fetchDashboard("shop-breakdown"), ...queryDefaults });
 
 export const useDrivers = () =>
-  useQuery<DriverItem[]>({ queryKey: ["dashboard", "drivers"], queryFn: () => fetchDashboard("drivers"), staleTime: 5 * 60 * 1000 });
+  useQuery<DriverItem[]>({ queryKey: ["dashboard", "drivers"], queryFn: () => fetchDashboard("drivers"), ...queryDefaults });
 
 export const useBenchmarks = () =>
-  useQuery<BenchmarkItem[]>({ queryKey: ["dashboard", "benchmarks"], queryFn: () => fetchDashboard("benchmarks"), staleTime: 5 * 60 * 1000 });
+  useQuery<BenchmarkItem[]>({ queryKey: ["dashboard", "benchmarks"], queryFn: () => fetchDashboard("benchmarks"), ...queryDefaults });
