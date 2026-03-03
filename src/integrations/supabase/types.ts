@@ -125,6 +125,45 @@ export type Database = {
         }
         Relationships: []
       }
+      plant_kpis: {
+        Row: {
+          id: number
+          intensity: number
+          plant_name: string
+          production: number
+          s1_intensity: number
+          s2_intensity: number
+          s3_intensity: number
+          s3_mining_intensity: number
+          total_emissions: number
+          updated_at: string | null
+        }
+        Insert: {
+          id?: number
+          intensity: number
+          plant_name: string
+          production?: number
+          s1_intensity?: number
+          s2_intensity?: number
+          s3_intensity?: number
+          s3_mining_intensity?: number
+          total_emissions: number
+          updated_at?: string | null
+        }
+        Update: {
+          id?: number
+          intensity?: number
+          plant_name?: string
+          production?: number
+          s1_intensity?: number
+          s2_intensity?: number
+          s3_intensity?: number
+          s3_mining_intensity?: number
+          total_emissions?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

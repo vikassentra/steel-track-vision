@@ -82,42 +82,24 @@ Deno.serve(async (req) => {
       }
 
       case "shop-breakdown": {
-        // Emissions by plant, aggregated by scope
-        const [emissionsRes, prodRes] = await Promise.all([
-          supabase.from("emissions_data")
-            .select("plant_name, scope_name, co2e_value, is_to_be_subtracted")
-            .eq("is_accepted", 1),
-          supabase.from("kpi_values")
-            .select("value")
-            .eq("metric_name", "production")
-            .single(),
-        ]);
-        if (emissionsRes.error) throw emissionsRes.error;
-        const production = prodRes.data?.value ?? 5000000;
+        // Use pre-calculated plant KPIs from the Formula tab
+        const { data: plantData, error: plantError } = await supabase
+          .from("plant_kpis")
+          .select("*")
+          .order("total_emissions", { ascending: false });
+        if (plantError) throw plantError;
 
-        const shopMap = new Map<string, { scope1: number; scope2: number; scope3: number }>();
-        emissionsRes.data.forEach((row: any) => {
-          if (!shopMap.has(row.plant_name)) {
-            shopMap.set(row.plant_name, { scope1: 0, scope2: 0, scope3: 0 });
-          }
-          const entry = shopMap.get(row.plant_name)!;
-          const val = Number(row.co2e_value) * (row.is_to_be_subtracted === 1 ? -1 : 1);
-          if (row.scope_name === "Scope 1") entry.scope1 += val;
-          else if (row.scope_name === "Scope 2") entry.scope2 += val;
-          else entry.scope3 += val;
-        });
-
-        const shops = Array.from(shopMap.entries()).map(([shop, scopes]) => {
-          const total = scopes.scope1 + scopes.scope2 + scopes.scope3;
+        const shops = (plantData ?? []).map((row: any) => {
+          const prod = Number(row.production);
           return {
-            shop,
-            scope1: Math.round(scopes.scope1),
-            scope2: Math.round(scopes.scope2),
-            scope3: Math.round(scopes.scope3),
-            total: Math.round(total),
-            intensity: +(total / Number(production)).toFixed(4),
+            shop: row.plant_name,
+            scope1: Math.round(Number(row.s1_intensity) * prod),
+            scope2: Math.round(Number(row.s2_intensity) * prod),
+            scope3: Math.round((Number(row.s3_intensity) + Number(row.s3_mining_intensity)) * prod),
+            total: Math.round(Number(row.total_emissions)),
+            intensity: +Number(row.intensity).toFixed(4),
           };
-        }).sort((a, b) => b.total - a.total);
+        });
 
         return new Response(JSON.stringify(shops), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
