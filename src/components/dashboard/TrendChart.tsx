@@ -8,6 +8,8 @@ interface TrendChartProps {
   onPointClick: (date: string) => void;
   unitMode: UnitMode;
   frequency: "Monthly" | "Daily";
+  fromMonth?: string;
+  toMonth?: string;
 }
 
 const absUnit = (mode: UnitMode) => mode === "energy" ? "TJ" : "tCO2e";
@@ -31,8 +33,8 @@ const CustomTooltip = ({ active, payload, label, unitMode }: any) => {
   );
 };
 
-const TrendChart = ({ onPointClick, unitMode, frequency }: TrendChartProps) => {
-  const { data: trendData, isLoading } = useTrend();
+const TrendChart = ({ onPointClick, unitMode, frequency, fromMonth, toMonth }: TrendChartProps) => {
+  const { data: trendData, isLoading } = useTrend(fromMonth, toMonth);
   const periodLabel = frequency === "Daily" ? "day" : "month";
 
   if (isLoading || !trendData) {

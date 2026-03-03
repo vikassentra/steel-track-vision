@@ -1,7 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 
-const fetchDashboard = async (action: string) => {
-  const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/dashboard-api?action=${action}`;
+const fetchDashboard = async (action: string, from?: string, to?: string) => {
+  let queryStr = `action=${action}`;
+  if (from) queryStr += `&from=${from}`;
+  if (to) queryStr += `&to=${to}`;
+  const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/dashboard-api?${queryStr}`;
   const res = await fetch(url, {
     headers: {
       apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
@@ -76,14 +79,14 @@ const queryDefaults = { staleTime: 5 * 60 * 1000, retry: 3, retryDelay: (attempt
 export const useKPIs = () =>
   useQuery<KPIData>({ queryKey: ["dashboard", "kpis"], queryFn: () => fetchDashboard("kpis"), ...queryDefaults });
 
-export const useTrend = () =>
-  useQuery<TrendPoint[]>({ queryKey: ["dashboard", "trend"], queryFn: () => fetchDashboard("trend"), ...queryDefaults });
+export const useTrend = (from?: string, to?: string) =>
+  useQuery<TrendPoint[]>({ queryKey: ["dashboard", "trend", from, to], queryFn: () => fetchDashboard("trend", from, to), ...queryDefaults });
 
-export const useShopBreakdown = () =>
-  useQuery<ShopBreakdownItem[]>({ queryKey: ["dashboard", "shop-breakdown"], queryFn: () => fetchDashboard("shop-breakdown"), ...queryDefaults });
+export const useShopBreakdown = (from?: string, to?: string) =>
+  useQuery<ShopBreakdownItem[]>({ queryKey: ["dashboard", "shop-breakdown", from, to], queryFn: () => fetchDashboard("shop-breakdown", from, to), ...queryDefaults });
 
-export const useDrivers = (plant?: string) =>
-  useQuery<DriverItem[]>({ queryKey: ["dashboard", "drivers", plant ?? "All"], queryFn: () => fetchDashboard(`drivers${plant && plant !== "All" ? `&plant=${encodeURIComponent(plant)}` : ""}`), ...queryDefaults });
+export const useDrivers = (plant?: string, from?: string, to?: string) =>
+  useQuery<DriverItem[]>({ queryKey: ["dashboard", "drivers", plant ?? "All", from, to], queryFn: () => fetchDashboard(`drivers${plant && plant !== "All" ? `&plant=${encodeURIComponent(plant)}` : ""}`, from, to), ...queryDefaults });
 
 export const useBenchmarks = () =>
   useQuery<BenchmarkItem[]>({ queryKey: ["dashboard", "benchmarks"], queryFn: () => fetchDashboard("benchmarks"), ...queryDefaults });
