@@ -96,7 +96,7 @@ const BreakdownPanels = ({ onShopClick, onScopeClick, onDriverClick, activeScope
           <div className="flex gap-3">
             <div className="flex-1 min-w-0">
               <ResponsiveContainer width="100%" height={driverChartData.length * 32 + 40}>
-                <BarChart data={driverChartData} layout="vertical" barCategoryGap="18%" onClick={(e: any) => e?.activeLabel && onDriverClick?.(e.activeLabel)}>
+                <BarChart data={driverChartData} layout="vertical" barCategoryGap="18%" margin={{ top: 5, right: 5, bottom: 25, left: 5 }} onClick={(e: any) => e?.activeLabel && onDriverClick?.(e.activeLabel)}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 18%)" horizontal={false} />
                   <XAxis type="number" tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }} />
                   <YAxis type="category" dataKey="driver" tick={{ fontSize: 10, fill: "hsl(215 15% 55%)" }} width={90} />
@@ -114,13 +114,13 @@ const BreakdownPanels = ({ onShopClick, onScopeClick, onDriverClick, activeScope
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <div className="shrink-0 w-56 pt-[6px]">
-              <div className="grid grid-cols-3 gap-x-2 mb-1">
+            <div className="shrink-0 w-56 relative" style={{ height: driverChartData.length * 32 + 40 }}>
+              <div className="grid grid-cols-3 gap-x-2 absolute top-0 left-0 right-0 px-1">
                 <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider text-right">% Contrib</p>
                 <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider text-right">Δ Activity</p>
                 <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider text-right">Δ tCO₂e</p>
               </div>
-              <div>
+              <div className="absolute left-0 right-0" style={{ top: "20px" }}>
                 {(() => {
                   const grandTotal = driverChartData.reduce((sum, r) => sum + r.total, 0);
                   return driverChartData.map((row) => {
