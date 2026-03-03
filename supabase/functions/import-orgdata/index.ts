@@ -7,14 +7,22 @@ const corsHeaders = {
 };
 
 function parseTimestamp(raw: string): string {
-  // Handle DD/MM/YYYY HH:mm:ss format
   if (!raw) return "2023-01-01";
-  const parts = raw.split(" ")[0].split("/");
+  // Handle YYYY-MM-DD-HH-MM-SS or YYYY-MM-DD HH:MM:SS or YYYY-MM-DD
+  const s = String(raw).trim();
+  // If already starts with YYYY-MM-DD pattern, extract the date part
+  const isoMatch = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (isoMatch) {
+    const [, yyyy, mm, dd] = isoMatch;
+    return `${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}`;
+  }
+  // Handle DD/MM/YYYY or MM/DD/YYYY with slashes
+  const parts = s.split(" ")[0].split("/");
   if (parts.length === 3) {
     const [mm, dd, yyyy] = parts;
     return `${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}`;
   }
-  return raw.substring(0, 10);
+  return s.substring(0, 10);
 }
 
 function cleanNumber(val: any): number {
